@@ -1,11 +1,23 @@
-namespace Domain.Entities;
+using System.Text.Json.Serialization;
+using Domain.Entities.Base;
 
-public class DeletedMessageEntity
+namespace Domain.Entities
 {
-    public string Pk => $"deletedMessage#{UserId}#{RoomId}";
-    public string Sk => MessageId;
+    public class DeletedMessageEntity : IEntity
+    {
+        [JsonPropertyName("pk")]
+        public string Pk => $"deletedMessage#{UserId}#{RoomId}";
 
-    public string RoomId { get; set; } = default!;
-    public string MessageId { get; set; } = default!;
-    public string UserId { get; set; } = default!;
+        [JsonPropertyName("sk")]
+        public string Sk => MessageId;
+
+        [JsonPropertyName("roomId")]
+        public string RoomId { get; set; } = default!;
+
+        [JsonPropertyName("messageId")]
+        public string MessageId { get; set; } = default!;
+
+        [JsonPropertyName("userId")]
+        public string UserId { get; set; } = default!;
+    }
 }

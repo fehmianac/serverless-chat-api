@@ -1,9 +1,10 @@
-namespace Domain.Enum;
-
-public enum MessageStatus
+namespace Domain.Enum
 {
-    Pending = 0,
-    Delivered = 1,
-    Read = 2,
-    Deleted = 3
+    public enum MessageStatus
+    {
+        Pending = 0,
+        Delivered = 1,
+        Read = 2,
+        Deleted = 3
+    }
 }

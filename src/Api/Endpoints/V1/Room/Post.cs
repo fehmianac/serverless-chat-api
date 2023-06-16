@@ -1,0 +1,64 @@
+using Api.Endpoints.V1.Models.Room;
+using Api.Infrastructure.Context;
+using Api.Infrastructure.Contract;
+using Domain.Dto.Room;
+using Domain.Entities;
+using Domain.Events.Contracts;
+using Domain.Events.Room;
+using Domain.Repositories;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Api.Endpoints.V1.Room
+{
+    public class Post : IEndpoint
+    {
+        private static async Task<IResult> Handler(
+            [FromBody] RoomCreateRequestModel request,
+            [FromServices] IApiContext apiContext,
+            [FromServices] IRoomRepository roomRepository,
+            [FromServices] IUserRoomRepository userRoomRepository,
+            [FromServices] IRoomLastActivityRepository roomLastActivityRepository,
+            [FromServices] IEventPublisher eventPublisher,
+            CancellationToken cancellationToken)
+        {
+            request.Attenders.Add(apiContext.CurrentUserId);
+            var utcNow = DateTime.UtcNow;
+            var room = new RoomEntity
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Attenders = request.Attenders,
+                Admins = new List<string> {apiContext.CurrentUserId},
+                Description = request.Description,
+                Name = request.Name,
+                CreatedAt = utcNow,
+                ImageUrl = request.ImageUrl,
+                TypingAttenders = new List<RoomEntity.TypingAttenderDataModel>(),
+                LastActivityAt = utcNow,
+                LastMessageInfo = new List<string>()
+            };
+
+            var saveRoomTask = roomRepository.SaveRoomAsync(room, cancellationToken);
+            var saveUserRoomTask = userRoomRepository.SaveBatchAsync(room.Id, room.Attenders, utcNow, cancellationToken);
+            var saveRoomLastActivityTask = roomLastActivityRepository.SaveRoomLastActivityAsync(room.Id, utcNow, cancellationToken);
+            var eventPublishTask = eventPublisher.PublishAsync(new RoomCreatedEvent
+            {
+                Room = room.ToDto()
+            }, cancellationToken);
+            
+            await Task.WhenAll(saveRoomTask, saveUserRoomTask, saveRoomLastActivityTask, eventPublishTask);
+            return Results.Created($"/v1/rooms/{room.Id}", room.Id);
+        }
+
+        public void MapEndpoint(IEndpointRouteBuilder endpoints)
+        {
+            endpoints.MapPost("v1/rooms", Handler)
+                .Produces<string>(StatusCodes.Status201Created)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status500InternalServerError)
+                .WithTags("Room");
+            ;
+        }
+    }
+}

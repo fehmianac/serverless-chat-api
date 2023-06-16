@@ -1,23 +1,41 @@
+using System.Text.Json.Serialization;
 using Domain.Extensions;
 
-namespace Domain.Entities;
-
-public class ThreadEntity
+namespace Domain.Entities
 {
-    public string Pk => $"thread#{RoomId}";
-    public long Sk => LastActivityAt.ToUnixTimeMilliseconds();
-    
-    public string Id { get; set; } = default!;
-    public string RoomId { get; set; } = default!;
-
-    public Dictionary<string, string> AdditionalInfo { get; set; } = new();
-    public List<LastMessageInfoDataModel>? LastMessageInfo { get; set; } = new();
-    public DateTime CreatedAt { get; set; }
-    public DateTime LastActivityAt { get; set; }
-
-    public class LastMessageInfoDataModel
+    public class ThreadEntity
     {
-        public string Pk { get; set; } = default!;
-        public string Sk { get; set; } = default!;
+        [JsonPropertyName("pk")]
+        public string Pk => $"thread#{RoomId}";
+
+        [JsonPropertyName("sk")]
+        public long Sk => LastActivityAt.ToUnixTimeMilliseconds();
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = default!;
+
+        [JsonPropertyName("roomId")]
+        public string RoomId { get; set; } = default!;
+
+        [JsonPropertyName("additionalInfo")]
+        public Dictionary<string, string> AdditionalInfo { get; set; } = new();
+
+        [JsonPropertyName("lastMessageInfo")]
+        public List<LastMessageInfoDataModel>? LastMessageInfo { get; set; } = new();
+
+        [JsonPropertyName("createdAt")]
+        public DateTime CreatedAt { get; set; }
+
+        [JsonPropertyName("lastActivityAt")]
+        public DateTime LastActivityAt { get; set; }
+
+        public class LastMessageInfoDataModel
+        {
+            [JsonPropertyName("pk")]
+            public string Pk { get; set; } = default!;
+
+            [JsonPropertyName("sk")]
+            public string Sk { get; set; } = default!;
+        }
     }
 }

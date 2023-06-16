@@ -1,9 +1,10 @@
-namespace Domain.Extensions;
-
-public static class DatetimeExtensions
+namespace Domain.Extensions
 {
-    public static long ToUnixTimeMilliseconds(this DateTime dateTime)
+    public static class DatetimeExtensions
     {
-        return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+        public static long ToUnixTimeMilliseconds(this DateTime dateTime)
+        {
+            return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+        }
     }
 }

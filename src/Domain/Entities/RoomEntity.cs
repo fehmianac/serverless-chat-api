@@ -1,31 +1,64 @@
-namespace Domain.Entities;
+using Domain.Entities.Base;
 
-public class RoomEntity
+namespace Domain.Entities
 {
-    public string Pk => $"rooms";
-    public string Sk => Id;
-    public string Id { get; set; } = default!;
-    public string Name { get; set; } = default!;
-    public string Description { get; set; } = default!;
-    public string ImageUrl { get; set; } = default!;
-    public List<string> Attenders { get; set; } = new();
-    public List<string> Admins { get; set; } = new();
+    using System.Text.Json.Serialization;
 
-    public List<LastMessageInfoDataModel> LastMessageInfo { get; set; } = new();
-    public List<TypingAttenderDataModel> TypingAttenders { get; set; } = new();
-
-    public DateTime CreatedAt { get; set; }
-    public DateTime LastActivityAt { get; set; }
-
-    public class LastMessageInfoDataModel
+    public class RoomEntity : IEntity
     {
-        public string Pk { get; set; } = default!;
-        public string Sk { get; set; } = default!;
-    }
+        [JsonPropertyName("pk")]
+        public string Pk => $"rooms";
 
-    public class TypingAttenderDataModel
-    {
-        public string UserId { get; set; } = default!;
-        public DateTime TypingAt { get; set; }
+        [JsonPropertyName("sk")]
+        public string Sk => Id;
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = default!;
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = default!;
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; } = default!;
+
+        [JsonPropertyName("imageUrl")]
+        public string ImageUrl { get; set; } = default!;
+
+        [JsonPropertyName("attenders")]
+        public List<string> Attenders { get; set; } = new();
+
+        [JsonPropertyName("admins")]
+        public List<string> Admins { get; set; } = new();
+
+        [JsonPropertyName("lastMessageInfo")]
+        public List<string> LastMessageInfo { get; set; } = new();
+
+        [JsonPropertyName("typingAttenders")]
+        public List<TypingAttenderDataModel> TypingAttenders { get; set; } = new();
+
+        [JsonPropertyName("createdAt")]
+        public DateTime CreatedAt { get; set; }
+
+        [JsonPropertyName("lastActivityAt")]
+        public DateTime LastActivityAt { get; set; }
+
+        public class TypingAttenderDataModel
+        {
+            [JsonPropertyName("userId")]
+            public string UserId { get; set; } = default!;
+
+            [JsonPropertyName("typingAt")]
+            public DateTime TypingAt { get; set; }
+        }
+        
+        public bool IsAdmin(string userId)
+        {
+            return Admins.Contains(userId);
+        }
+        
+        public bool IsAttender(string userId)
+        {
+            return Attenders.Contains(userId);
+        }
     }
 }

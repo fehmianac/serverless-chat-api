@@ -1,45 +1,49 @@
+using System.Text.Json.Serialization;
+using Domain.Entities.Base;
 using Domain.Enum;
 using Domain.Extensions;
 
-namespace Domain.Entities;
-
-public class MessageEntity
+namespace Domain.Entities
 {
-    public string Pk => $"messages#{RoomId}";
-    public long Sk => CreatedAt.ToUnixTimeMilliseconds();
-    public string Gsi => Id;
-
-    public string Id { get; set; } = default!;
-    public string RoomId { get; set; } = default!;
-    
-    public string? ThreadId { get; set; }
-
-    public string SenderId { get; set; } = default!;
-
-    public string Body { get; set; } = default!;
-    public DateTime CreatedAt { get; set; }
-
-    public List<MessageStatusDataModel> MessageStatus { get; set; } = new();
-    public List<MessageReactionDataModel> MessageReactions { get; set; } = new();
-    public MessageAttachmentDataModel? MessageAttachment { get; set; }
-
-    public class MessageStatusDataModel
+    public class MessageEntity : IEntity
     {
-        public string TargetId { get; set; } = default!;
-        public MessageStatus Status { get; set; }
-        public DateTime CreatedUtc { get; set; }
-    }
+        [JsonPropertyName("pk")] public string Pk => $"messages#{RoomId}";
+        [JsonPropertyName("sk")] public string Sk => Id;
+        [JsonPropertyName("id")] public string Id { get; set; } = default!;
+        [JsonPropertyName("roomId")] public string RoomId { get; set; } = default!;
+        [JsonPropertyName("threadId")] public string? ThreadId { get; set; }
+        [JsonPropertyName("senderId")] public string SenderId { get; set; } = default!;
+        [JsonPropertyName("body")] public string Body { get; set; } = default!;
+        [JsonPropertyName("createdAt")] public DateTime CreatedAt { get; set; }
+        [JsonPropertyName("messageStatus")] public List<MessageStatusDataModel> MessageStatus { get; set; } = new();
+        [JsonPropertyName("messageReactions")] public List<MessageReactionDataModel> MessageReactions { get; set; } = new();
+        [JsonPropertyName("messageAttachment")] public MessageAttachmentDataModel? MessageAttachment { get; set; }
 
-    public class MessageReactionDataModel
-    {
-        public string UserId { get; set; } = default!;
-        public string Reaction { get; set; } = default!;
-    }
+        public class MessageStatusDataModel
+        {
+            [JsonPropertyName("targetId")] public string TargetId { get; set; } = default!;
 
-    public class MessageAttachmentDataModel
-    {
-        public string Type { get; set; } = default!;
-        public string Body { get; set; } = null!;
-        public Dictionary<string, string> AdditionalData { get; set; } = new();
+            [JsonPropertyName("status")] public MessageStatus Status { get; set; }
+
+            [JsonPropertyName("createdUtc")] public DateTime CreatedUtc { get; set; }
+        }
+
+        public class MessageReactionDataModel
+        {
+            [JsonPropertyName("userId")] public string UserId { get; set; } = default!;
+
+            [JsonPropertyName("reaction")] public string Reaction { get; set; } = default!;
+
+            [JsonPropertyName("time")] public DateTime Time { get; set; }
+        }
+
+        public class MessageAttachmentDataModel
+        {
+            [JsonPropertyName("type")] public string Type { get; set; } = default!;
+
+            [JsonPropertyName("payload")] public string Payload { get; set; } = null!;
+
+            [JsonPropertyName("additionalData")] public Dictionary<string, string> AdditionalData { get; set; } = new();
+        }
     }
 }

@@ -7,8 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Externals\" />
-      <Folder Include="Repositories\" />
+      <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.103.20" />
+      <PackageReference Include="AWSSDK.SQS" Version="3.7.103.4" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 
 </Project>
