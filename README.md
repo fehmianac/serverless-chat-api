@@ -3,6 +3,11 @@
 ## Description
 The Serverless Chat API is an AWS serverless application built using .NET 6.0 and DynamoDB. It provides a scalable and efficient chat solution by leveraging the power of AWS Lambda, API Gateway, and DynamoDB. This API works in conjunction with the open-source solution "AWS WebSocket Adapter," available at [https://github.com/fehmianac/aws-web-socket-adapter](https://github.com/fehmianac/aws-web-socket-adapter).
 
+
+## Infrastructure Diagram
+![infra.png](docs%2Finfra.png)
+
+
 ## Features
 - Real-time chat functionality
 - Scalable serverless architecture
