@@ -58,7 +58,7 @@ GET /chat
 ```
 
 ## Contributing
-Contributions to the Serverless Chat API are welcome! If you find any issues or want to suggest improvements, please submit an issue or pull request on the GitHub repository: [https://github.com/fehmianac/aws-web-socket-adapter](https://github.com/fehmianac/aws-web-socket-adapter)
+Contributions to the Serverless Chat API are welcome! If you find any issues or want to suggest improvements, please submit an issue or pull request on the GitHub repository: [https://github.com/fehmianac/serverless-chat-api](https://github.com/fehmianac/serverless-chat-api)
 
 ## License
 The Serverless Chat API is released under the [MIT License](LICENSE). Feel free to use, modify, and distribute it as per the terms of the license.
