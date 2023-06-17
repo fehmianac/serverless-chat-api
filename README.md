@@ -37,25 +37,7 @@ To get started with the Serverless Chat API, perform the following steps:
 ## Usage
 The Serverless Chat API provides the following endpoints:
 
-- **POST /chat**: Sends a chat message to the API.
-
-Example request:
-```
-POST /chat
-Content-Type: application/json
-
-{
-  "sender": "John",
-  "message": "Hello, World!"
-}
-```
-
-- **GET /chat**: Retrieves all chat messages from the API.
-
-Example request:
-```
-GET /chat
-```
+![swagger.png](docs%2Fswagger.png)
 
 ## Contributing
 Contributions to the Serverless Chat API are welcome! If you find any issues or want to suggest improvements, please submit an issue or pull request on the GitHub repository: [https://github.com/fehmianac/serverless-chat-api](https://github.com/fehmianac/serverless-chat-api)
