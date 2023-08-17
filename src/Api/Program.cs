@@ -21,6 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AwsWebSocketAdapterConfig>(builder.Configuration.GetSection("AwsWebSocketAdapterConfig"));
 // Add services to the container.
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddControllers();
