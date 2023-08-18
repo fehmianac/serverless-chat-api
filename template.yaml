@@ -18,7 +18,7 @@ Resources:
       Name: serverless-chat-api
       Description: Chat App API
       EndpointConfiguration:
-          Types:
+        Types:
           - REGIONAL
 
   ProxyRoute:
@@ -27,7 +27,7 @@ Resources:
       RestApiId: !Ref ChatApi
       ParentId: !GetAtt ChatApi.RootResourceId
       PathPart: '{proxy+}'
-    
+  
   ProxyRouteAnyMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -39,15 +39,15 @@ Resources:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ChatApiLambdaFunction.Arn}/invocations
-          
-
+  
+  
   Deployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - ProxyRouteAnyMethod
     Properties:
-        RestApiId: !Ref ChatApi
-        StageName: Prod
+      RestApiId: !Ref ChatApi
+      StageName: Prod
 
 
   ChatApiTable:
@@ -65,6 +65,7 @@ Resources:
           KeyType: "RANGE"
       BillingMode:
         PAY_PER_REQUEST
+       
       SSESpecification:
         SSEEnabled: True
       TableName: chat-app-table

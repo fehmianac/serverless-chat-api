@@ -256,7 +256,8 @@ namespace Infrastructure.Repositories.Base
                     {":v_pk", new AttributeValue {S = pk}}
                 },
                 ExclusiveStartKey = exclusiveStartKey,
-                ScanIndexForward = false
+                ScanIndexForward = false,
+                Limit = limit.Value,
             };
 
             var response = await _dynamoDb.QueryAsync(queryRequest, cancellationToken);
@@ -306,7 +307,6 @@ namespace Infrastructure.Repositories.Base
             return (result, HttpUtility.UrlEncode(lastKeyEvaluated), response.Count);
         }
 
-     
 
         protected abstract string GetTableName();
     }
