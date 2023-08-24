@@ -1,7 +1,9 @@
 using System.Reflection;
 using Amazon;
 using Amazon.DynamoDBv2;
+using Amazon.Extensions.Configuration.SystemsManager;
 using Amazon.Extensions.NETCore.Setup;
+using Amazon.SimpleNotificationService;
 using Amazon.SQS;
 using Api.Extensions;
 using Api.Infrastructure.Context;
@@ -18,6 +20,16 @@ using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Configuration.AddSystemsManager(config =>
+{
+    config.Path = "/chat-api";
+    config.ParameterProcessor = new JsonParameterProcessor();
+    config.ReloadAfter = TimeSpan.FromMinutes(5);
+    config.Optional = true;
+});
+
+builder.Services.Configure<EventBusSettings>(builder.Configuration.GetSection("EventBusSettings"));
 builder.Services.Configure<AwsWebSocketAdapterConfig>(builder.Configuration.GetSection("AwsWebSocketAdapterConfig"));
 // Add services to the container.
 
@@ -33,11 +45,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDefaultAWSOptions(new AWSOptions
 {
     Profile = "serverless",
-    Region = RegionEndpoint.EUCentral1
 });
 
 builder.Services.AddAWSService<IAmazonDynamoDB>();
 builder.Services.AddAWSService<IAmazonSQS>();
+builder.Services.AddAWSService<IAmazonSimpleNotificationService>();
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
 builder.Services.AddScoped<IClearRoomRepository, ClearRoomRepository>();
@@ -51,6 +63,7 @@ builder.Services.AddScoped<IRoomLastActivityRepository, RoomLastActivityReposito
 builder.Services.AddScoped<IApiContext, ApiContext>();
 builder.Services.AddScoped<IEventPublisher, EventPublisher>();
 builder.Services.AddScoped<IPubSubServices, PubSubService>();
+builder.Services.AddScoped<IEventBusManager, EventBusManager>();
 var assemblies = GetAssembly();
 foreach (var assembly in assemblies)
 {

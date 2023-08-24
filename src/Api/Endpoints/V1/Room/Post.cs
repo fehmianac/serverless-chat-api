@@ -6,6 +6,7 @@ using Domain.Entities;
 using Domain.Events.Contracts;
 using Domain.Events.Room;
 using Domain.Repositories;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Endpoints.V1.Room
@@ -19,6 +20,7 @@ namespace Api.Endpoints.V1.Room
             [FromServices] IUserRoomRepository userRoomRepository,
             [FromServices] IRoomLastActivityRepository roomLastActivityRepository,
             [FromServices] IEventPublisher eventPublisher,
+            [FromServices] IEventBusManager eventBusManager,
             CancellationToken cancellationToken)
         {
             request.Attenders.Add(apiContext.CurrentUserId);
@@ -44,7 +46,8 @@ namespace Api.Endpoints.V1.Room
             {
                 Room = room.ToDto()
             }, cancellationToken);
-            
+
+            await eventBusManager.RoomCreatedAsync(room.ToDto(), cancellationToken);
             await Task.WhenAll(saveRoomTask, saveUserRoomTask, saveRoomLastActivityTask, eventPublishTask);
             return Results.Created($"/v1/rooms/{room.Id}", room.Id);
         }

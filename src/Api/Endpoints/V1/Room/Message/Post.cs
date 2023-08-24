@@ -1,12 +1,14 @@
 using Api.Endpoints.V1.Models.Room.Message;
 using Api.Infrastructure.Context;
 using Api.Infrastructure.Contract;
+using Domain.Dto.Room;
 using Domain.Entities;
 using Domain.Enum;
 using Domain.Events.Contracts;
 using Domain.Events.Room;
 using Domain.Extensions;
 using Domain.Repositories;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Endpoints.V1.Room.Message
@@ -19,6 +21,7 @@ namespace Api.Endpoints.V1.Room.Message
             [FromServices] IRoomRepository roomRepository,
             [FromServices] IMessageRepository messageRepository,
             [FromServices] IEventPublisher eventPublisher,
+            [FromServices] IEventBusManager eventBusManager,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -35,7 +38,7 @@ namespace Api.Endpoints.V1.Room.Message
             var utcNow = DateTime.UtcNow;
 
             var messageId = utcNow.ToUnixTimeMilliseconds().ToString();
-            await messageRepository.SaveMessageAsync(new MessageEntity
+            var messageEntity = new MessageEntity
             {
                 Id = messageId,
                 Body = request.Body,
@@ -58,7 +61,8 @@ namespace Api.Endpoints.V1.Room.Message
                         Payload = request.Attachment.Payload,
                         AdditionalData = request.Attachment.AdditionalData
                     },
-            }, cancellationToken);
+            };
+            await messageRepository.SaveMessageAsync(messageEntity, cancellationToken);
 
             room.LastMessageInfo.Add(messageId);
             room.LastMessageInfo = room.LastMessageInfo.TakeLast(3).ToList();
@@ -70,6 +74,7 @@ namespace Api.Endpoints.V1.Room.Message
                 ActivityAt = utcNow,
                 HasNewMessage = true
             }, cancellationToken);
+            await eventBusManager.RoomMessageAddedAsync(room.ToDto(), messageEntity.ToDto(), cancellationToken);
             return Results.Ok();
         }
 

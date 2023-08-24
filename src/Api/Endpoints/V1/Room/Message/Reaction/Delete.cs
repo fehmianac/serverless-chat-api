@@ -1,8 +1,10 @@
 using Api.Endpoints.V1.Models.Room.Message;
 using Api.Infrastructure.Context;
 using Api.Infrastructure.Contract;
+using Domain.Dto.Room;
 using Domain.Entities;
 using Domain.Repositories;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Endpoints.V1.Room.Message.Reaction
@@ -15,6 +17,7 @@ namespace Api.Endpoints.V1.Room.Message.Reaction
             [FromServices] IApiContext apiContext,
             [FromServices] IRoomRepository roomRepository,
             [FromServices] IMessageRepository messageRepository,
+            [FromServices] IEventBusManager eventBusManager,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -41,6 +44,7 @@ namespace Api.Endpoints.V1.Room.Message.Reaction
 
             message.MessageReactions.RemoveAll(q => q.UserId == apiContext.CurrentUserId && q.Reaction == request.Reaction);
             await messageRepository.SaveMessageAsync(message, cancellationToken);
+            await eventBusManager.RoomMessageReactionRemovedAsync(room.ToDto(), messageId, request.Reaction, cancellationToken);
             return Results.Ok();
         }
 

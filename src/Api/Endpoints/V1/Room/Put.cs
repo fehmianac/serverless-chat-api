@@ -1,9 +1,11 @@
 using Api.Endpoints.V1.Models.Room;
 using Api.Infrastructure.Context;
 using Api.Infrastructure.Contract;
+using Domain.Dto.Room;
 using Domain.Events.Contracts;
 using Domain.Events.Room;
 using Domain.Repositories;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -16,6 +18,7 @@ namespace Api.Endpoints.V1.Room
             [FromServices] IApiContext apiContext,
             [FromServices] IRoomRepository roomRepository,
             [FromServices] IEventPublisher eventPublisher,
+            [FromServices] IEventBusManager eventBusManager,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -39,6 +42,8 @@ namespace Api.Endpoints.V1.Room
                 ActivityAt = DateTime.UtcNow,
                 RoomId = id
             }, cancellationToken);
+            await eventBusManager.RoomModifiedAsync(room.ToDto(), cancellationToken);
+
             return Results.Ok();
         }
 

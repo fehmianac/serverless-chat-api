@@ -135,6 +135,38 @@ Resources:
                 Action:
                   - sqs:*
                 Resource: arn:aws:sqs:*:*:*
+        - PolicyName: UserApiLambdaSNSPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:*
+                Resource: arn:aws:sns:*:*:*
+        - PolicyName: allowParameterStore
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParametersByPath
+                Resource: '*'
+  
+  ChatApiEventBus:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ChatApiEventBus
+  
+  
+  ChatApiEventBusParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /chat-api/EventBusSettings
+      Type: String
+      Value: !Join [ '', [ '{"IsEnabled":true,"TopicArn":"',!Ref ChatApiEventBus,'"}' ] ]
+      Description: ChatApiEventBusParameter
+                
 Outputs:
   ChatApiURI:
     Description: "The Rest URI to connect to"
