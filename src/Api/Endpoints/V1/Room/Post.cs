@@ -28,7 +28,7 @@ namespace Api.Endpoints.V1.Room
             var room = new RoomEntity
             {
                 Id = Guid.NewGuid().ToString("N"),
-                Attenders = request.Attenders,
+                Attenders = request.Attenders.Distinct().ToList(),
                 Admins = new List<string> {apiContext.CurrentUserId},
                 Description = request.Description,
                 Name = request.Name,

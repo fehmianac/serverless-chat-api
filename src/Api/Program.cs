@@ -1,8 +1,6 @@
 using System.Reflection;
-using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.Configuration.SystemsManager;
-using Amazon.Extensions.NETCore.Setup;
 using Amazon.SimpleNotificationService;
 using Amazon.SQS;
 using Api.Extensions;
@@ -20,7 +18,6 @@ using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Configuration.AddSystemsManager(config =>
 {
     config.Path = "/chat-api";
@@ -31,26 +28,24 @@ builder.Configuration.AddSystemsManager(config =>
 
 builder.Services.Configure<EventBusSettings>(builder.Configuration.GetSection("EventBusSettings"));
 builder.Services.Configure<AwsWebSocketAdapterConfig>(builder.Configuration.GetSection("AwsWebSocketAdapterConfig"));
-// Add services to the container.
 
+// Add services to the container.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-builder.Services.AddDefaultAWSOptions(new AWSOptions
-{
-    Profile = "serverless",
-});
+var option = builder.Configuration.GetAWSOptions();
+builder.Services.AddDefaultAWSOptions(option);
 
 builder.Services.AddAWSService<IAmazonDynamoDB>();
 builder.Services.AddAWSService<IAmazonSQS>();
 builder.Services.AddAWSService<IAmazonSimpleNotificationService>();
-builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
+builder.Services.AddAWSLambdaHosting(Environment.GetEnvironmentVariable("ApiGatewayType") == "RestApi" ? LambdaEventSource.RestApi : LambdaEventSource.HttpApi);
 
 builder.Services.AddScoped<IClearRoomRepository, ClearRoomRepository>();
 builder.Services.AddScoped<IDeletedMessageRepository, DeletedMessageRepository>();

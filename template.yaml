@@ -13,43 +13,50 @@ Parameters:
 
 Resources:
   ChatApi:
-    Type: AWS::ApiGateway::RestApi
+    Type: AWS::ApiGatewayV2::Api
     Properties:
-      Name: serverless-chat-api
-      Description: Chat App API
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
+      Name: chat-api
+      ProtocolType: HTTP
 
   ProxyRoute:
-    Type: AWS::ApiGateway::Resource
+    Type: AWS::ApiGatewayV2::Route
     Properties:
-      RestApiId: !Ref ChatApi
-      ParentId: !GetAtt ChatApi.RootResourceId
-      PathPart: '{proxy+}'
-  
-  ProxyRouteAnyMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ChatApi
-      ResourceId: !Ref ProxyRoute
+      ApiId: !Ref ChatApi
+      RouteKey: 'ANY /{proxy+}'
       AuthorizationType: NONE
-      HttpMethod: ANY
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ChatApiLambdaFunction.Arn}/invocations
-  
-  
-  Deployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn:
-      - ProxyRouteAnyMethod
+      OperationName: ChatApiEndpoints
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ProxyRouteAnyMethod
+
+  ProxyRouteAnyMethod:
+    Type: AWS::ApiGatewayV2::Integration
     Properties:
-      RestApiId: !Ref ChatApi
-      StageName: Prod
+      ApiId: !Ref ChatApi
+      PayloadFormatVersion: '2.0'
+      Description: ProxyRoute Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ChatApiLambdaFunction.Arn}/invocations
 
 
+  Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ProxyRoute
+    Properties:
+      ApiId: !Ref ChatApi  
+      
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: prod
+      Description: Prod Stage
+      DeploymentId: !Ref Deployment
+      ApiId: !Ref ChatApi
+      
   ChatApiTable:
     Type: AWS::DynamoDB::Table
     Properties:
