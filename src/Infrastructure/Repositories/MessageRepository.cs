@@ -31,17 +31,17 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> SaveMessageAsync(MessageEntity message, CancellationToken cancellationToken = default)
         {
-            return await base.SaveAsync(message, cancellationToken);
+            return await SaveAsync(message, cancellationToken);
         }
 
         public async Task<IList<MessageEntity>> GetBatchAsync(IEnumerable<MessageEntity> messageEntities, CancellationToken cancellationToken)
         {
-            return await base.BatchGetAsync(messageEntities.ToList(), cancellationToken);
+            return await BatchGetAsync(messageEntities.ToList(), cancellationToken);
         }
 
         public async Task<MessageEntity?> GetMessageAsync(string id, string messageId, CancellationToken cancellationToken)
         {
-            return await base.GetAsync<MessageEntity?>($"messages#{id}", messageId, cancellationToken);
+            return await GetAsync<MessageEntity?>($"messages#{id}", messageId, cancellationToken);
         }
     }
 }

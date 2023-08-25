@@ -25,7 +25,7 @@ public static class IocExtensions
         ServiceLifetime lifetime = ServiceLifetime.Scoped)
     {
         assembly.GetTypesAssignableTo(compareType)
-            ?.ForEach((type) =>
+            .ForEach((type) =>
         {
             foreach (var implementedInterface in type.ImplementedInterfaces)
             {

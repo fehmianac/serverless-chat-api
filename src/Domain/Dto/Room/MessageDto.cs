@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Domain.Entities;
 using Domain.Enum;
 

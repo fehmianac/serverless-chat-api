@@ -130,16 +130,8 @@ namespace Infrastructure.Repositories.Base
                 return;
             }
 
-            var writeRequests = new List<WriteRequest>();
-            foreach (var entity in putItemList)
-            {
-                writeRequests.Add(new WriteRequest(new PutRequest(entity.ToAttributeMap())));
-            }
-
-            foreach (var entity in deleteItemList)
-            {
-                writeRequests.Add(new WriteRequest(new DeleteRequest(entity.ToKeyAttributeMap())));
-            }
+            var writeRequests = putItemList.Select(entity => new WriteRequest(new PutRequest(entity.ToAttributeMap()))).ToList();
+            writeRequests.AddRange(deleteItemList.Select(entity => new WriteRequest(new DeleteRequest(entity.ToKeyAttributeMap()))));
 
             var chunks = writeRequests.Chunk(25);
             var tableName = GetTableName();
@@ -187,10 +179,7 @@ namespace Infrastructure.Repositories.Base
             }
 
             var responseList = response.Responses[tableName];
-            foreach (var dict in responseList)
-            {
-                result.Add(dict.ToEntity<T>());
-            }
+            result.AddRange(responseList.Select(dict => dict.ToEntity<T>()));
 
             return result;
         }
@@ -231,8 +220,7 @@ namespace Infrastructure.Repositories.Base
 
         protected async Task<(List<T> entities, string pageToken, long count)> GetPagedAsync<T>(string pk, string? pagedToken, int? limit, CancellationToken cancellationToken)
         {
-            if (!limit.HasValue)
-                limit = 100;
+            limit ??= 100;
             var result = new List<T>();
             var exclusiveStartKey = new Dictionary<string, AttributeValue>();
             if (!string.IsNullOrEmpty(pagedToken))
@@ -270,8 +258,7 @@ namespace Infrastructure.Repositories.Base
 
         protected async Task<(List<T> entities, string pageToken, long count)> GetPagedAsync<T>(string pk, SkOperator op, string sk, string? pagedToken, int? limit, CancellationToken cancellationToken)
         {
-            if (!limit.HasValue)
-                limit = 100;
+            limit ??= 100;
             var result = new List<T>();
             var exclusiveStartKey = new Dictionary<string, AttributeValue>();
             if (!string.IsNullOrEmpty(pagedToken))
@@ -296,7 +283,8 @@ namespace Infrastructure.Repositories.Base
                     {":sk", new AttributeValue {S = sk}}
                 },
                 ExclusiveStartKey = exclusiveStartKey,
-                ScanIndexForward = false
+                ScanIndexForward = false,
+                Limit = limit.Value
             };
 
             var response = await _dynamoDb.QueryAsync(queryRequest, cancellationToken);

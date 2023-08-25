@@ -2,7 +2,6 @@ using Api.Endpoints.V1.Models.Room.Message;
 using Api.Infrastructure.Context;
 using Api.Infrastructure.Contract;
 using Domain.Dto.Room;
-using Domain.Entities;
 using Domain.Repositories;
 using Domain.Services;
 using Microsoft.AspNetCore.Mvc;

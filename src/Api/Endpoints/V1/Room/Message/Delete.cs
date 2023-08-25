@@ -1,8 +1,6 @@
 using Api.Infrastructure.Context;
 using Api.Infrastructure.Contract;
 using Domain.Entities;
-using Domain.Events.Contracts;
-using Domain.Events.Room;
 using Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -53,7 +51,6 @@ namespace Api.Endpoints.V1.Room.Message
                 .ProducesProblem(StatusCodes.Status403Forbidden)
                 .ProducesProblem(StatusCodes.Status404NotFound)
                 .WithTags("Room");
-            ;
         }
     }
 }

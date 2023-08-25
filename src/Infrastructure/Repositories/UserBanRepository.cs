@@ -16,12 +16,12 @@ public class UserBanRepository : DynamoRepository, IUserBanRepository
 
     public async Task<bool> IsBannedAsync(string fromUserId, string toUserId, CancellationToken cancellationToken = default)
     {
-        return await base.GetAsync<UserBanEntity>($"userBan#{fromUserId}", toUserId, cancellationToken) != null;
+        return await GetAsync<UserBanEntity>($"userBan#{fromUserId}", toUserId, cancellationToken) != null;
     }
 
     public async Task<bool> SaveBanAsync(string fromUserId, string toUserId, CancellationToken cancellationToken = default)
     {
-        return await base.SaveAsync(new UserBanEntity
+        return await SaveAsync(new UserBanEntity
         {
             FromUserId = fromUserId,
             ToUserId = toUserId,
@@ -31,12 +31,12 @@ public class UserBanRepository : DynamoRepository, IUserBanRepository
 
     public async Task<bool> DeleteBanAsync(string fromUserId, string toUserId, CancellationToken cancellationToken = default)
     {
-        return await base.DeleteAsync($"userBan#{fromUserId}", toUserId, cancellationToken);
+        return await DeleteAsync($"userBan#{fromUserId}", toUserId, cancellationToken);
     }
 
     public async Task<IEnumerable<string>> GetBannedUsersAsync(string fromUserId, CancellationToken cancellationToken = default)
     {
-        var bans = await base.GetAllAsync<UserBanEntity>($"userBan#{fromUserId}", cancellationToken);
+        var bans = await GetAllAsync<UserBanEntity>($"userBan#{fromUserId}", cancellationToken);
         return bans.Select(q => q.ToUserId);
     }
 }

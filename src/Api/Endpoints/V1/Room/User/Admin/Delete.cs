@@ -61,7 +61,6 @@ namespace Api.Endpoints.V1.Room.User.Admin
                 .ProducesProblem(StatusCodes.Status403Forbidden)
                 .ProducesProblem(StatusCodes.Status404NotFound)
                 .WithTags("Room");
-            ;
         }
     }
 }

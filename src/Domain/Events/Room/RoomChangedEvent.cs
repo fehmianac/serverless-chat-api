@@ -1,5 +1,3 @@
-using Domain.Entities;
-
 namespace Domain.Events.Room;
 
 public class RoomChangedEvent

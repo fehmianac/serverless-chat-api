@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Amazon.SQS;
 using Amazon.SQS.Model;
-using Domain.Dto.Notifier;
 using Domain.Dto.Notifier.Base;
 using Domain.Options;
 using Domain.Services;

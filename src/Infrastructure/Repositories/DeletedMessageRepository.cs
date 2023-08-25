@@ -16,12 +16,12 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> SaveDeletedMessageAsync(DeletedMessageEntity deletedMessage, CancellationToken cancellationToken = default)
         {
-            return await base.SaveAsync(deletedMessage, cancellationToken);
+            return await SaveAsync(deletedMessage, cancellationToken);
         }
 
         public async Task<IEnumerable<DeletedMessageEntity>> GetDeletedMessagesAsync(string userId, string roomId, CancellationToken cancellationToken = default)
         {
-            return await base.GetAllAsync<DeletedMessageEntity>($"deletedMessage#{userId}#{roomId}", cancellationToken);
+            return await GetAllAsync<DeletedMessageEntity>($"deletedMessage#{userId}#{roomId}", cancellationToken);
         }
     }
 }

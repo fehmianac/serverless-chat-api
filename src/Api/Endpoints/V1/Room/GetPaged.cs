@@ -82,7 +82,6 @@ namespace Api.Endpoints.V1.Room
                 .ProducesProblem(StatusCodes.Status404NotFound)
                 .ProducesProblem(StatusCodes.Status500InternalServerError)
                 .WithTags("Room");
-            ;
         }
     }
 }

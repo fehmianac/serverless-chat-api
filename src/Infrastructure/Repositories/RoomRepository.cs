@@ -39,13 +39,13 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> UpdateLastActivityAtAsync(string roomId, DateTime lastActivityAt, CancellationToken cancellationToken = default)
         {
-            var room = await base.GetAsync<RoomEntity>("rooms", roomId, cancellationToken);
+            var room = await GetAsync<RoomEntity>("rooms", roomId, cancellationToken);
             if(room == null)
             {
                 return false;
             }
             room.LastActivityAt = lastActivityAt;
-            return await base.SaveAsync(room, cancellationToken);
+            return await SaveAsync(room, cancellationToken);
         }
 
         protected override string GetTableName() => TableNames.TableName;

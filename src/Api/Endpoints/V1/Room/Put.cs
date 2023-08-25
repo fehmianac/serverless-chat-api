@@ -7,7 +7,6 @@ using Domain.Events.Room;
 using Domain.Repositories;
 using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Api.Endpoints.V1.Room
 {
