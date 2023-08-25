@@ -47,8 +47,8 @@ Resources:
     DependsOn:
       - ProxyRoute
     Properties:
-      ApiId: !Ref ChatApi  
-      
+      ApiId: !Ref ChatApi
+  
   Stage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
@@ -56,7 +56,7 @@ Resources:
       Description: Prod Stage
       DeploymentId: !Ref Deployment
       ApiId: !Ref ChatApi
-      
+  
   ChatApiTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -72,10 +72,10 @@ Resources:
           KeyType: "RANGE"
       BillingMode:
         PAY_PER_REQUEST
-       
+      
       SSESpecification:
         SSEEnabled: True
-      TableName: chat-app-table
+      TableName: chat
 
   ChatApiLambdaFunction:
     Type: AWS::Serverless::Function
@@ -91,11 +91,17 @@ Resources:
       Runtime: dotnet6
       Environment:
         Variables:
-          TABLE_NAME: chat-app-table
+          TABLE_NAME: chat
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: chat-app-table
-
+            TableName: chat
+  
+  ChatApiLambdaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ChatApiLambdaFunction"
+      RetentionInDays: 14
+  
   ChatApiLambdaFunctionPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -173,7 +179,15 @@ Resources:
       Type: String
       Value: !Join [ '', [ '{"IsEnabled":true,"TopicArn":"',!Ref ChatApiEventBus,'"}' ] ]
       Description: ChatApiEventBusParameter
-                
+
+  ChatApiApiKey:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /chat-api/ApiKeyValidationSettings
+      Type: String
+      Value: !Join [ '', [ '{"IsEnabled":false,"HeaderName":"x-api-key","WhiteList":["/swagger"],"ApiKey":"',!Ref AWS::StackId,'"}' ] ]
+      Description: ChatApiEventBusParameter
+      
 Outputs:
   ChatApiURI:
     Description: "The Rest URI to connect to"
