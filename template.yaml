@@ -156,6 +156,7 @@ Resources:
                 Action:
                   - sns:*
                 Resource: arn:aws:sns:*:*:*
+               
         - PolicyName: allowParameterStore
           PolicyDocument:
             Version: '2012-10-17'
@@ -188,6 +189,15 @@ Resources:
       Value: !Join [ '', [ '{"IsEnabled":false,"HeaderName":"x-api-key","WhiteList":["/swagger"],"ApiKey":"',!Ref AWS::StackId,'"}' ] ]
       Description: ChatApiEventBusParameter
       
+  AwsWebSocketAdapterConfig:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /chat-api/AwsWebSocketAdapterConfig
+      Type: String
+      Value: !Join [ '', [ '{"Enabled":true,"QueueUrl":"x-api-key"}' ] ]
+      Description: ChatApiEventBusParameter  
+  
+        
 Outputs:
   ChatApiURI:
     Description: "The Rest URI to connect to"
