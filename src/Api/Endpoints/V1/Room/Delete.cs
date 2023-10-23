@@ -10,7 +10,7 @@ namespace Api.Endpoints.V1.Room;
 public class Delete : IEndpoint
 {
     private static async Task<IResult> Handler(
-        [FromQuery] string id,
+        [FromRoute] string id,
         [FromServices] IApiContext apiContext,
         [FromServices] IRoomRepository roomRepository,
         [FromServices] IUserRoomRepository userRoomRepository,
