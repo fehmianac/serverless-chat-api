@@ -20,6 +20,8 @@ namespace Api.Endpoints.V1.Room.Message
             [FromServices] IApiContext apiContext,
             [FromServices] IRoomRepository roomRepository,
             [FromServices] IMessageRepository messageRepository,
+            [FromServices] IRoomLastActivityRepository roomLastActivityRepository,
+            [FromServices] IUserRoomRepository userRoomRepository,
             [FromServices] IEventPublisher eventPublisher,
             [FromServices] IEventBusManager eventBusManager,
             CancellationToken cancellationToken)
@@ -67,6 +69,9 @@ namespace Api.Endpoints.V1.Room.Message
             room.LastMessageInfo.Add(messageId);
             room.LastMessageInfo = room.LastMessageInfo.TakeLast(3).ToList();
             await roomRepository.SaveRoomAsync(room, cancellationToken);
+            var roomLastActivity = await roomLastActivityRepository.GetRoomLastActivityAsync(room.Id, cancellationToken);
+            var lastActivity = roomLastActivity?.LastActivityAt ?? utcNow;
+            await userRoomRepository.SaveBatchAsync(room.Id, room.Attenders, lastActivity, cancellationToken);
 
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {
