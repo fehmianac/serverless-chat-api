@@ -253,7 +253,7 @@ namespace Infrastructure.Repositories.Base
 
             var lastKeyEvaluated = JsonSerializer.Serialize(response.LastEvaluatedKey);
 
-            return (result, lastKeyEvaluated, response.Count);
+            return (result, HttpUtility.UrlEncode(lastKeyEvaluated), response.Count);
         }
 
         protected async Task<(List<T> entities, string pageToken, long count)> GetPagedAsync<T>(string pk, SkOperator op, string sk, string? pagedToken, int? limit, CancellationToken cancellationToken)
