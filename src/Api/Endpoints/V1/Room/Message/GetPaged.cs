@@ -1,3 +1,4 @@
+using System.Web;
 using Api.Infrastructure.Context;
 using Api.Infrastructure.Contract;
 using Domain.Dto;
@@ -33,7 +34,8 @@ namespace Api.Endpoints.V1.Room.Message
                 return Results.Forbid();
             }
 
-            var deletedMessagesResult = await deletedMessageRepository.GetDeletedMessagesAsync(apiContext.CurrentUserId, id, cancellationToken);
+            var deletedMessagesResult =
+                await deletedMessageRepository.GetDeletedMessagesAsync(apiContext.CurrentUserId, id, cancellationToken);
             var deletedMessagesHashSet = new HashSet<string>(deletedMessagesResult.Select(q => q.MessageId));
             var clearRoomResult = await clearRoomRepository.GetAsync(apiContext.CurrentUserId, id, cancellationToken);
             long? lastClearTime = null;
@@ -42,7 +44,8 @@ namespace Api.Endpoints.V1.Room.Message
                 lastClearTime = clearRoomResult.Time;
             }
 
-            var (messages, nextTokenResult) = await messageRepository.GetMessagePagedAsync(id, nextToken, limit, lastClearTime, cancellationToken);
+            var (messages, nextTokenResult) =
+                await messageRepository.GetMessagePagedAsync(id, nextToken, limit, lastClearTime, cancellationToken);
 
             var messageResult = messages.Select(q => q.ToDto()).ToList();
             foreach (var messageDto in messageResult)
@@ -72,7 +75,7 @@ namespace Api.Endpoints.V1.Room.Message
                 Data = messageResult,
                 Limit = limit,
                 NextToken = nextTokenResult,
-                PreviousToken = nextToken
+                PreviousToken = HttpUtility.UrlEncode(nextToken)
             });
         }
 

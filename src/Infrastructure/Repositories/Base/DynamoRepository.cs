@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Web;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using Domain.Entities;
 using Domain.Entities.Base;
 using Domain.Enum;
 using Infrastructure.Extensions;
@@ -43,9 +44,9 @@ namespace Infrastructure.Repositories.Base
                     KeyConditionExpression = "pk = :pk",
                     ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                     {
-                        {":pk", new AttributeValue {S = pk}}
+                        { ":pk", new AttributeValue { S = pk } }
                     },
-                    ExclusiveStartKey = lastKeyEvaluated
+                    ExclusiveStartKey = lastKeyEvaluated,
                 };
 
                 var response = await _dynamoDb.QueryAsync(request, cancellationToken);
@@ -57,7 +58,8 @@ namespace Infrastructure.Repositories.Base
             return entities;
         }
 
-        protected async Task<List<T>> GetAllAsync<T>(string pk, string sk, SkOperator op, CancellationToken cancellationToken)
+        protected async Task<List<T>> GetAllAsync<T>(string pk, string sk, SkOperator op,
+            CancellationToken cancellationToken)
         {
             var entities = new List<T>();
             Dictionary<string, AttributeValue> lastKeyEvaluated = new();
@@ -70,8 +72,8 @@ namespace Infrastructure.Repositories.Base
                     KeyConditionExpression = GetKeyConditionExpression(op),
                     ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                     {
-                        {":pk", new AttributeValue {S = pk}},
-                        {":sk", new AttributeValue {S = sk}}
+                        { ":pk", new AttributeValue { S = pk } },
+                        { ":sk", new AttributeValue { S = sk } }
                     },
                     ExclusiveStartKey = lastKeyEvaluated
                 };
@@ -92,8 +94,8 @@ namespace Infrastructure.Repositories.Base
                 TableName = GetTableName(),
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    {"pk", new AttributeValue {S = pk}},
-                    {"sk", new AttributeValue {S = sk}}
+                    { "pk", new AttributeValue { S = pk } },
+                    { "sk", new AttributeValue { S = sk } }
                 }
             };
 
@@ -114,8 +116,8 @@ namespace Infrastructure.Repositories.Base
                 TableName = GetTableName(),
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    {"pk", new AttributeValue {S = pk}},
-                    {"sk", new AttributeValue {S = sk}}
+                    { "pk", new AttributeValue { S = pk } },
+                    { "sk", new AttributeValue { S = sk } }
                 }
             };
 
@@ -123,15 +125,18 @@ namespace Infrastructure.Repositories.Base
             return response.HttpStatusCode == HttpStatusCode.OK;
         }
 
-        protected async Task BatchWriteAsync(List<IEntity> putItemList, List<IEntity> deleteItemList, CancellationToken cancellationToken)
+        protected async Task BatchWriteAsync(List<IEntity> putItemList, List<IEntity> deleteItemList,
+            CancellationToken cancellationToken)
         {
             if (!putItemList.Any() && !deleteItemList.Any())
             {
                 return;
             }
 
-            var writeRequests = putItemList.Select(entity => new WriteRequest(new PutRequest(entity.ToAttributeMap()))).ToList();
-            writeRequests.AddRange(deleteItemList.Select(entity => new WriteRequest(new DeleteRequest(entity.ToKeyAttributeMap()))));
+            var writeRequests = putItemList.Select(entity => new WriteRequest(new PutRequest(entity.ToAttributeMap())))
+                .ToList();
+            writeRequests.AddRange(deleteItemList.Select(entity =>
+                new WriteRequest(new DeleteRequest(entity.ToKeyAttributeMap()))));
 
             var chunks = writeRequests.Chunk(25);
             var tableName = GetTableName();
@@ -139,7 +144,7 @@ namespace Infrastructure.Repositories.Base
             {
                 var request = new BatchWriteItemRequest
                 {
-                    RequestItems = new Dictionary<string, List<WriteRequest>> {{tableName, chunk.ToList()}}
+                    RequestItems = new Dictionary<string, List<WriteRequest>> { { tableName, chunk.ToList() } }
                 };
 
                 BatchWriteItemResponse response;
@@ -151,7 +156,8 @@ namespace Infrastructure.Repositories.Base
             }
         }
 
-        protected async Task<List<T>> BatchGetAsync<T>(List<T> entities, CancellationToken cancellationToken) where T : IEntity, new()
+        protected async Task<List<T>> BatchGetAsync<T>(List<T> entities, CancellationToken cancellationToken)
+            where T : IEntity, new()
         {
             var result = new List<T>();
             if (!entities.Any())
@@ -169,7 +175,7 @@ namespace Infrastructure.Repositories.Base
 
             var batchGetRequest = new BatchGetItemRequest
             {
-                RequestItems = new Dictionary<string, KeysAndAttributes> {{tableName, keysAndAttributes}}
+                RequestItems = new Dictionary<string, KeysAndAttributes> { { tableName, keysAndAttributes } }
             };
 
             var response = await _dynamoDb.BatchGetItemAsync(batchGetRequest, cancellationToken);
@@ -218,7 +224,8 @@ namespace Infrastructure.Repositories.Base
             return exp;
         }
 
-        protected async Task<(List<T> entities, string pageToken, long count)> GetPagedAsync<T>(string pk, string? pagedToken, int? limit, CancellationToken cancellationToken)
+        protected async Task<(List<T> entities, string pageToken, long count)> GetPagedAsync<T>(string pk,
+            string? pagedToken, int? limit, CancellationToken cancellationToken)
         {
             limit ??= 100;
             var result = new List<T>();
@@ -228,6 +235,11 @@ namespace Infrastructure.Repositories.Base
                 try
                 {
                     exclusiveStartKey = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(pagedToken);
+                    exclusiveStartKey = new Dictionary<string, AttributeValue>
+                    {
+                        { "pk", new AttributeValue { S = exclusiveStartKey["pk"].S } },
+                        { "sk", new AttributeValue { S = exclusiveStartKey["sk"].S } }
+                    };
                 }
                 catch
                 {
@@ -235,28 +247,27 @@ namespace Infrastructure.Repositories.Base
                 }
             }
 
-            var queryRequest = new QueryRequest
+            var request = new QueryRequest
             {
                 TableName = GetTableName(),
-                KeyConditionExpression = "pk = :v_pk",
+                KeyConditionExpression = "pk = :pk",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    {":v_pk", new AttributeValue {S = pk}}
+                    { ":pk", new AttributeValue { S = pk } }
                 },
                 ExclusiveStartKey = exclusiveStartKey,
                 ScanIndexForward = false,
                 Limit = limit.Value,
             };
 
-            var response = await _dynamoDb.QueryAsync(queryRequest, cancellationToken);
+            var response = await _dynamoDb.QueryAsync(request, cancellationToken);
             result.AddRange(response.Items.Select(item => item.ToEntity<T>()));
-
             var lastKeyEvaluated = JsonSerializer.Serialize(response.LastEvaluatedKey);
-
             return (result, HttpUtility.UrlEncode(lastKeyEvaluated), response.Count);
         }
 
-        protected async Task<(List<T> entities, string pageToken, long count)> GetPagedAsync<T>(string pk, SkOperator op, string sk, string? pagedToken, int? limit, CancellationToken cancellationToken)
+        protected async Task<(List<T> entities, string pageToken, long count)> GetPagedAsync<T>(string pk,
+            SkOperator op, string sk, string? pagedToken, int? limit, CancellationToken cancellationToken)
         {
             limit ??= 100;
             var result = new List<T>();
@@ -279,8 +290,8 @@ namespace Infrastructure.Repositories.Base
                 KeyConditionExpression = GetKeyConditionExpression(op),
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    {":pk", new AttributeValue {S = pk}},
-                    {":sk", new AttributeValue {S = sk}}
+                    { ":pk", new AttributeValue { S = pk } },
+                    { ":sk", new AttributeValue { S = sk } }
                 },
                 ExclusiveStartKey = exclusiveStartKey,
                 ScanIndexForward = false,
