@@ -8,6 +8,7 @@ namespace Api.Endpoints.V1.Models.Room
         public string Name { get; set; } = default!;
         public string Description { get; set; } = default!;
         public string ImageUrl { get; set; } = default!;
+        public bool IsGroup { get; set; } = false;
         public List<string> Attenders { get; set; } = new();
     }
 

@@ -24,14 +24,28 @@ namespace Api.Endpoints.V1.Room
             CancellationToken cancellationToken)
         {
             request.Attenders.Add(apiContext.CurrentUserId);
+            request.Attenders = request.Attenders.Distinct().ToList();
+            if (request.Attenders.Count > 2)
+            {
+                request.IsGroup = true;
+            }
+
+            if (!request.IsGroup)
+            {
+                var roomId = await roomRepository.FindPrivateRoomUserMappingAsync(request.Attenders, cancellationToken);
+                if (!string.IsNullOrEmpty(roomId))
+                    return Results.Created($"/v1/rooms/{roomId}", roomId);
+            }
+            
             var utcNow = DateTime.UtcNow;
             var room = new RoomEntity
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Attenders = request.Attenders.Distinct().ToList(),
-                Admins = new List<string> {apiContext.CurrentUserId},
+                Admins = new List<string> { apiContext.CurrentUserId },
                 Description = request.Description,
                 Name = request.Name,
+                IsGroup = request.IsGroup,
                 CreatedAt = utcNow,
                 ImageUrl = request.ImageUrl,
                 TypingAttenders = new List<RoomEntity.TypingAttenderDataModel>(),
@@ -40,8 +54,11 @@ namespace Api.Endpoints.V1.Room
             };
 
             var saveRoomTask = roomRepository.SaveRoomAsync(room, cancellationToken);
-            var saveUserRoomTask = userRoomRepository.SaveBatchAsync(room.Id, room.Attenders, utcNow, cancellationToken);
-            var saveRoomLastActivityTask = roomLastActivityRepository.SaveRoomLastActivityAsync(room.Id, utcNow, cancellationToken);
+            var saveUserRoomTask =
+                userRoomRepository.SaveBatchAsync(room.Id, room.Attenders, utcNow, cancellationToken);
+            var saveRoomLastActivityTask =
+                roomLastActivityRepository.SaveRoomLastActivityAsync(room.Id, utcNow, cancellationToken);
+
             var eventPublishTask = eventPublisher.PublishAsync(new RoomCreatedEvent
             {
                 Room = room.ToDto()
@@ -49,6 +66,11 @@ namespace Api.Endpoints.V1.Room
 
             await eventBusManager.RoomCreatedAsync(room.ToDto(), cancellationToken);
             await Task.WhenAll(saveRoomTask, saveUserRoomTask, saveRoomLastActivityTask, eventPublishTask);
+            if (!request.IsGroup)
+            {
+                await roomRepository.SavePrivateRoomUserMappingAsync(room.Id, request.Attenders, cancellationToken);
+            }
+
             return Results.Created($"/v1/rooms/{room.Id}", room.Id);
         }
 

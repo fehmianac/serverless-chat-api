@@ -33,6 +33,10 @@ namespace Api.Endpoints.V1.Room.User
                 return Results.Forbid();
             }
 
+            if (!room.IsGroup)
+            {
+                return Results.Forbid();
+            }
             room.Attenders.Add(userId);
             await roomRepository.SaveRoomAsync(room, cancellationToken);
             var utcNow = DateTime.UtcNow;

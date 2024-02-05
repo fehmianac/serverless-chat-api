@@ -40,7 +40,11 @@ namespace Api.Endpoints.V1.Room.User.Admin
             {
                 return Results.Ok();
             }
-
+            
+            if (!room.IsGroup)
+            {
+                return Results.Forbid();
+            }
             room.Admins.Add(userId);
 
             await roomRepository.SaveRoomAsync(room, cancellationToken);

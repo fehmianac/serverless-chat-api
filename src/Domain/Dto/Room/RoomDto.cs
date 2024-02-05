@@ -16,6 +16,7 @@ namespace Domain.Dto.Room
         public DateTime LastActivityAt { get; set; }
         public int UnReadMessageCount { get; set; }
         public bool HasNotification { get; set; }
+        public bool IsGroup { get; set; }
 
         public class TypingAttenderDto
         {
@@ -56,6 +57,7 @@ namespace Domain.Dto.Room
                 Description = entity.Description,
                 CreatedAt = entity.CreatedAt,
                 ImageUrl = entity.ImageUrl,
+                IsGroup = entity.IsGroup,
                 TypingAttenders = entity.TypingAttenders.Select(q => new RoomDto.TypingAttenderDto
                 {
                     TypingAt = q.TypingAt,

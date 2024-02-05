@@ -1,6 +1,7 @@
 using System.Reflection;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.Configuration.SystemsManager;
+using Amazon.Extensions.NETCore.Setup;
 using Amazon.SimpleNotificationService;
 using Amazon.SQS;
 using Api.Extensions;

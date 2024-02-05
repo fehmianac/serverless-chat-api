@@ -17,6 +17,9 @@ namespace Domain.Entities
 
         [JsonPropertyName("name")]
         public string Name { get; set; } = default!;
+        
+        [JsonPropertyName("isGroup")]
+        public bool IsGroup { get; set; }
 
         [JsonPropertyName("description")]
         public string Description { get; set; } = default!;
