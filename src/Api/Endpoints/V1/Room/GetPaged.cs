@@ -46,11 +46,11 @@ namespace Api.Endpoints.V1.Room
             var roomResult = rooms.Select(x => x.ToDto()).ToList();
             foreach (var roomDto in roomResult)
             {
-                var message = messages.FirstOrDefault(q => q.RoomId == roomDto.Id);
-                if (message == null)
+                var roomMessages = messages.Where(q => q.RoomId == roomDto.Id).ToList();
+                if (!roomMessages.Any())
                     continue;
 
-                roomDto.LastMessageInfo.Add(message.ToDto());
+                roomDto.LastMessageInfo.AddRange(roomMessages.Select(q=>q.ToDto()).OrderByDescending(q=> q.CreatedAt));
             }
 
             var roomNotificationList = await roomNotificationRepository.GetRoomNotificationAsync(userId, cancellationToken);

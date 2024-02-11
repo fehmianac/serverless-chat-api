@@ -55,7 +55,7 @@ namespace Api.Endpoints.V1.Room
 
             var saveRoomTask = roomRepository.SaveRoomAsync(room, cancellationToken);
             var saveUserRoomTask =
-                userRoomRepository.SaveBatchAsync(room.Id, room.Attenders, utcNow, cancellationToken);
+                userRoomRepository.SaveBatchAsync(room.Id, room.Attenders,null, utcNow, cancellationToken);
             var saveRoomLastActivityTask =
                 roomLastActivityRepository.SaveRoomLastActivityAsync(room.Id, utcNow, cancellationToken);
 

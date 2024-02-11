@@ -41,8 +41,7 @@ namespace Api.Endpoints.V1.Room.User
             await roomRepository.SaveRoomAsync(room, cancellationToken);
             var utcNow = DateTime.UtcNow;
             var roomLastActivity = await roomLastActivityRepository.GetRoomLastActivityAsync(room.Id, cancellationToken);
-            var lastActivity = roomLastActivity?.LastActivityAt ?? utcNow;
-            await userRoomRepository.SaveBatchAsync(room.Id, new List<string> {userId}, lastActivity, cancellationToken);
+            await userRoomRepository.SaveBatchAsync(room.Id, new List<string> {userId}, roomLastActivity?.LastActivityAt,utcNow, cancellationToken);
             
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {
