@@ -69,6 +69,7 @@ namespace Api.Endpoints.V1.Room.Message
             var lastMessages = room.LastMessageInfo.TakeLast(2).ToList();
             lastMessages.Add(messageId);
             room.LastMessageInfo = lastMessages;
+            room.LastActivityAt = utcNow;
             await roomRepository.SaveRoomAsync(room, cancellationToken);
              var roomLastActivity = await roomLastActivityRepository.GetRoomLastActivityAsync(room.Id, cancellationToken);
            

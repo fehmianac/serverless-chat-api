@@ -21,7 +21,8 @@ namespace Api.Endpoints.V1.Room
             CancellationToken cancellationToken)
         {
             var userId = apiContext.CurrentUserId;
-            var (userRooms, token) = await userRoomRepository.GetPagedAsync(userId, limit, nextToken, cancellationToken);
+            var (userRooms, token) =
+                await userRoomRepository.GetPagedAsync(userId, limit, nextToken, cancellationToken);
             if (!userRooms.Any())
             {
                 return Results.Ok(new PagedResponse<RoomDto>
@@ -33,7 +34,8 @@ namespace Api.Endpoints.V1.Room
                 });
             }
 
-            var rooms = await roomRepository.GetUserRoomsAsync(userRooms.Select(x => x.RoomId).ToList(), cancellationToken);
+            var rooms = await roomRepository.GetUserRoomsAsync(userRooms.Select(x => x.RoomId).ToList(),
+                cancellationToken);
 
             var messageEntities = rooms.SelectMany(q => q.LastMessageInfo.Select(x => new MessageEntity
             {
@@ -50,10 +52,12 @@ namespace Api.Endpoints.V1.Room
                 if (!roomMessages.Any())
                     continue;
 
-                roomDto.LastMessageInfo.AddRange(roomMessages.Select(q=>q.ToDto()).OrderByDescending(q=> q.CreatedAt));
+                roomDto.LastMessageInfo.AddRange(
+                    roomMessages.Select(q => q.ToDto()).OrderByDescending(q => q.CreatedAt));
             }
 
-            var roomNotificationList = await roomNotificationRepository.GetRoomNotificationAsync(userId, cancellationToken);
+            var roomNotificationList =
+                await roomNotificationRepository.GetRoomNotificationAsync(userId, cancellationToken);
             foreach (var roomDto in roomResult)
             {
                 var notification = roomNotificationList.FirstOrDefault(q => q.RoomId == roomDto.Id);
@@ -63,10 +67,11 @@ namespace Api.Endpoints.V1.Room
                 roomDto.UnReadMessageCount = notification.MessageCount;
                 roomDto.HasNotification = notification.HasNotification;
             }
-            
+
             return Results.Ok(new PagedResponse<RoomDto>
             {
-                Data = roomResult,
+                Data = roomResult
+                    .OrderByDescending(q => userRooms.Where(x => x.RoomId == q.Id).Max(x => x.LastActivityAt)).ToList(),
                 Limit = limit,
                 NextToken = token,
                 PreviousToken = nextToken
