@@ -79,7 +79,8 @@ namespace Api.Endpoints.V1.Room.Message
             {
                 RoomId = id,
                 ActivityAt = utcNow,
-                HasNewMessage = true
+                HasNewMessage = true,
+                MessageId = messageId
             }, cancellationToken);
             await eventBusManager.RoomMessageAddedAsync(room.ToDto(), messageEntity.ToDto(), cancellationToken);
             return Results.Ok();

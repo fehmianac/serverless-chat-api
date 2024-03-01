@@ -61,15 +61,7 @@ namespace Api.Endpoints.V1.Room.Message
                     messageDto.MessageAttachment.Payload = "attachment deleted";
                 }
             }
-
-            await roomNotificationRepository.SaveRoomNotificationAsync(new RoomNotificationEntity
-            {
-                RoomId = id,
-                MessageCount = 0,
-                HasNotification = false,
-                UserId = apiContext.CurrentUserId
-            }, cancellationToken);
-
+            
             return Results.Ok(new PagedResponse<MessageDto>
             {
                 Data = messageResult,

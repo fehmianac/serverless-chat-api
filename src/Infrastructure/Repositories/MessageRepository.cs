@@ -1,6 +1,7 @@
 using Amazon.DynamoDBv2;
 using Domain.Constant;
 using Domain.Entities;
+using Domain.Entities.Base;
 using Domain.Enum;
 using Domain.Repositories;
 using Infrastructure.Repositories.Base;
@@ -15,16 +16,20 @@ namespace Infrastructure.Repositories
 
         protected override string GetTableName() => TableNames.TableName;
 
-        public async Task<(IList<MessageEntity>, string)> GetMessagePagedAsync(string roomId, string? nextToken, int? limit, long? ignoreBeforeTimeStamp, CancellationToken cancellationToken = default)
+        public async Task<(IList<MessageEntity>, string)> GetMessagePagedAsync(string roomId, string? nextToken,
+            int? limit, long? ignoreBeforeTimeStamp, CancellationToken cancellationToken = default)
         {
             if (ignoreBeforeTimeStamp.HasValue)
             {
-                var (userRooms, token, _) = await GetPagedAsync<MessageEntity>($"messages#{roomId}", SkOperator.GreaterThan, ignoreBeforeTimeStamp.Value.ToString(), nextToken, limit, cancellationToken);
+                var (userRooms, token, _) = await GetPagedAsync<MessageEntity>($"messages#{roomId}",
+                    SkOperator.GreaterThan, ignoreBeforeTimeStamp.Value.ToString(), nextToken, limit,
+                    cancellationToken);
                 return (userRooms, token);
             }
             else
             {
-                var (userRooms, token, _) = await GetPagedAsync<MessageEntity>($"messages#{roomId}", nextToken, limit, cancellationToken);
+                var (userRooms, token, _) =
+                    await GetPagedAsync<MessageEntity>($"messages#{roomId}", nextToken, limit, cancellationToken);
                 return (userRooms, token);
             }
         }
@@ -34,14 +39,22 @@ namespace Infrastructure.Repositories
             return await SaveAsync(message, cancellationToken);
         }
 
-        public async Task<IList<MessageEntity>> GetBatchAsync(IEnumerable<MessageEntity> messageEntities, CancellationToken cancellationToken)
+        public async Task<IList<MessageEntity>> GetBatchAsync(IEnumerable<MessageEntity> messageEntities,
+            CancellationToken cancellationToken)
         {
             return await BatchGetAsync(messageEntities.ToList(), cancellationToken);
         }
 
-        public async Task<MessageEntity?> GetMessageAsync(string id, string messageId, CancellationToken cancellationToken)
+        public async Task<MessageEntity?> GetMessageAsync(string id, string messageId,
+            CancellationToken cancellationToken)
         {
             return await GetAsync<MessageEntity?>($"messages#{id}", messageId, cancellationToken);
+        }
+
+        public async Task<bool> SaveMessagesAsync(IList<MessageEntity> messages, CancellationToken cancellationToken)
+        {
+             await base.BatchWriteAsync(new List<IEntity>(messages), new List<IEntity>(), cancellationToken);
+             return true;
         }
     }
 }

@@ -16,7 +16,9 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
     private readonly IRoomNotificationRepository _roomNotificationRepository;
     private readonly IPubSubServices _pubSubServices;
 
-    public RoomChangeEventConsumer(IRoomRepository roomRepository, IUserRoomRepository userRoomRepository, IRoomLastActivityRepository roomLastActivityRepository, IRoomNotificationRepository roomNotificationRepository, IPubSubServices pubSubServices)
+    public RoomChangeEventConsumer(IRoomRepository roomRepository, IUserRoomRepository userRoomRepository,
+        IRoomLastActivityRepository roomLastActivityRepository, IRoomNotificationRepository roomNotificationRepository,
+        IPubSubServices pubSubServices)
     {
         _roomRepository = roomRepository;
         _userRoomRepository = userRoomRepository;
@@ -33,7 +35,8 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
             return;
         }
 
-        var roomLastActivity = await _roomLastActivityRepository.GetRoomLastActivityAsync(payload.RoomId, cancellationToken);
+        var roomLastActivity =
+            await _roomLastActivityRepository.GetRoomLastActivityAsync(payload.RoomId, cancellationToken);
 
         var oldestUserRoomActivities = new List<IEntity>();
         var newestUserRoomActivities = new List<IEntity>();
@@ -55,19 +58,30 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
             LastActivityAt = payload.ActivityAt
         }));
 
-        await _roomLastActivityRepository.SaveRoomLastActivityAsync(payload.RoomId, payload.ActivityAt, cancellationToken);
-        await _userRoomRepository.BatchWriteAsync(newestUserRoomActivities, oldestUserRoomActivities, cancellationToken);
+        await _roomLastActivityRepository.SaveRoomLastActivityAsync(payload.RoomId, payload.ActivityAt,
+            cancellationToken);
+        await _userRoomRepository.BatchWriteAsync(newestUserRoomActivities, oldestUserRoomActivities,
+            cancellationToken);
 
-        var notificationEntities = await _roomNotificationRepository.GetBatchRoomNotificationAsync(room.Attenders, payload.RoomId, cancellationToken);
+        var notificationEntities =
+            await _roomNotificationRepository.GetBatchRoomNotificationAsync(room.Attenders, payload.RoomId,
+                cancellationToken);
         if (!notificationEntities.Any())
         {
-            await _roomNotificationRepository.SaveBatchRoomNotificationAsync(room.Attenders.Select(q => new RoomNotificationEntity
-            {
-                HasNotification = true,
-                MessageCount = 1,
-                RoomId = room.Id,
-                UserId = q
-            }).ToList(), cancellationToken);
+            await _roomNotificationRepository.SaveBatchRoomNotificationAsync(room.Attenders.Select(q =>
+                new RoomNotificationEntity
+                {
+                    HasNotification = true,
+                    MessageCount = 1,
+                    RoomId = room.Id,
+                    UserId = q,
+                    MessageIds = payload is { MessageId: not null, HasNewMessage: true }
+                        ? new List<string>
+                        {
+                            payload.MessageId
+                        }
+                        : new List<string>()
+                }).ToList(), cancellationToken);
             return;
         }
 
@@ -76,6 +90,10 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
             if (payload.HasNewMessage)
             {
                 notificationEntity.MessageCount += 1;
+                if (!string.IsNullOrWhiteSpace(payload.MessageId))
+                {
+                    notificationEntity.MessageIds.Add(payload.MessageId);
+                }
             }
 
             notificationEntity.HasNotification = true;

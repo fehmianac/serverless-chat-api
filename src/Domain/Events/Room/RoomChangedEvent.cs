@@ -5,4 +5,5 @@ public class RoomChangedEvent
     public string RoomId { get; set; } = default!;
     public DateTime ActivityAt { get; set; }
     public bool HasNewMessage { get; set; }
+    public string? MessageId { get; set; }
 }
