@@ -78,7 +78,7 @@ public class Post : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("v1/room/{id}/message/read", Handler)
+        endpoints.MapPost("v1/room/{id}/messages/read", Handler)
             .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status403Forbidden)
