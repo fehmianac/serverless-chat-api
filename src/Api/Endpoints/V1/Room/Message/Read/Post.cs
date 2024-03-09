@@ -1,8 +1,10 @@
 using Api.Infrastructure.Context;
 using Api.Infrastructure.Contract;
+using Domain.Dto.Notifier;
 using Domain.Entities;
 using Domain.Enum;
 using Domain.Repositories;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Endpoints.V1.Room.Message.Read;
@@ -15,6 +17,7 @@ public class Post : IEndpoint
         [FromServices] IRoomNotificationRepository roomNotificationRepository,
         [FromServices] IMessageRepository messageRepository,
         [FromServices] IRoomRepository roomRepository,
+        [FromServices] IPubSubServices pubSubServices,
         CancellationToken cancellationToken
     )
     {
@@ -62,7 +65,14 @@ public class Post : IEndpoint
         roomNotification.MessageCount = 0;
         roomNotification.MessageIds = new List<string>();
 
+        var lastMessages = messages.MinBy(q => q.Id);
         await roomNotificationRepository.SaveRoomNotificationAsync(roomNotification, cancellationToken);
+        await pubSubServices.NotifyUser(room.Attenders, new RoomMessageReadModel
+        {
+            RoomId = id,
+            Type = "MessagesRead",
+            LastMessageId = lastMessages?.Id??string.Empty,
+        }, cancellationToken);
         return Results.Ok();
     }
 
