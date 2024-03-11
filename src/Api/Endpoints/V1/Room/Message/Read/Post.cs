@@ -21,7 +21,6 @@ public class Post : IEndpoint
         CancellationToken cancellationToken
     )
     {
-        
         var room = await roomRepository.GetRoomAsync(id, cancellationToken);
         if (room == null)
         {
@@ -33,9 +32,9 @@ public class Post : IEndpoint
             return Results.Forbid();
         }
 
-        
+
         var roomNotification =
-            await roomNotificationRepository.GetRoomNotificationAsync(id, apiContext.CurrentUserId, cancellationToken);
+            await roomNotificationRepository.GetRoomNotificationAsync(apiContext.CurrentUserId, id, cancellationToken);
         if (roomNotification == null)
         {
             return Results.Ok();
@@ -46,7 +45,7 @@ public class Post : IEndpoint
             RoomId = id,
             Id = q
         });
-        
+
         var messages = await messageRepository.GetBatchAsync(messageEntities, cancellationToken);
         foreach (var message in messages)
         {
@@ -59,7 +58,7 @@ public class Post : IEndpoint
                 return q;
             }).ToList();
         }
-        
+
         await messageRepository.SaveMessagesAsync(messages, cancellationToken);
         roomNotification.HasNotification = false;
         roomNotification.MessageCount = 0;
@@ -71,7 +70,7 @@ public class Post : IEndpoint
         {
             RoomId = id,
             Type = "MessagesRead",
-            LastMessageId = lastMessages?.Id??string.Empty,
+            LastMessageId = lastMessages?.Id ?? string.Empty,
         }, cancellationToken);
         return Results.Ok();
     }
