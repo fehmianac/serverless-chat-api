@@ -39,7 +39,11 @@ public class Post : IEndpoint
         {
             return Results.Ok();
         }
-
+        if(!roomNotification.MessageIds.Any())
+        {
+            return Results.Ok();
+        }
+        
         var messageEntities = roomNotification.MessageIds.Select(q => new MessageEntity
         {
             RoomId = id,
