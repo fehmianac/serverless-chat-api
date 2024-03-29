@@ -43,11 +43,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Logging.ClearProviders();
 // Serilog configuration        
 var logger = new LoggerConfiguration()
+    .Enrich.WithProperty("Application", "Chat")
     .WriteTo.Console(new JsonFormatter())
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("AWSSDK", LogEventLevel.Warning)
+    .MinimumLevel.Override("System.", LogEventLevel.Warning)
     .CreateLogger();
-// Register Serilog
-builder.Logging.AddSerilog(logger);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
