@@ -10,6 +10,16 @@ Parameters:
     Type: String
     Default: 'aws-websockets-adaptor'
     Description: (Required) The name of the S3 bucket where the Lambda function code is stored. Minimum 3 characters
+  
+  ExposeType:
+    Type: String
+    Default: 'FunctionUrl'
+    AllowedValues: ['FunctionUrl', 'ApiGateway']
+    Description: (Required) The type of exposure for the API. FunctionUrl or ApiGateway
+
+Conditions:
+  IsFunctionUrlAuth: !Equals [!Ref ExposeType, "FunctionUrl"]
+  IsApiGatewayAuth: !Equals [!Ref ExposeType, "ApiGateway"]
 
 Resources:
   ChatApi:
@@ -17,7 +27,8 @@ Resources:
     Properties:
       Name: chat-api
       ProtocolType: HTTP
-
+    Condition: IsApiGatewayAuth
+    
   ProxyRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -29,7 +40,8 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref ProxyRouteAnyMethod
-
+    Condition: IsApiGatewayAuth
+    
   ProxyRouteAnyMethod:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -40,7 +52,7 @@ Resources:
       IntegrationUri:
         Fn::Sub:
           arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ChatApiLambdaFunction.Arn}/invocations
-
+    Condition: IsApiGatewayAuth
 
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
@@ -48,7 +60,8 @@ Resources:
       - ProxyRoute
     Properties:
       ApiId: !Ref ChatApi
-  
+    Condition: IsApiGatewayAuth
+    
   Stage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
@@ -56,7 +69,18 @@ Resources:
       Description: Prod Stage
       DeploymentId: !Ref Deployment
       ApiId: !Ref ChatApi
-  
+    Condition: IsApiGatewayAuth
+    
+  ChatApiLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ChatApi
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ChatApiLambdaFunction
+      Principal: apigateway.amazonaws.com
+    Condition: IsApiGatewayAuth
+    
   ChatApiTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -95,22 +119,30 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: chat
-  
+
+  ChatApiApiFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !Ref ChatApiLambdaFunction
+    Condition: IsFunctionUrlAuth
+
+  ChatApiFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - ChatApiLambdaFunction
+    Properties:
+      Action: lambda:InvokeFunctionUrl
+      FunctionName: !Ref ChatApiLambdaFunction
+      FunctionUrlAuthType: 'NONE'
+      Principal: "*"
+      
   ChatApiLambdaFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/lambda/ChatApiLambdaFunction"
       RetentionInDays: 14
   
-  ChatApiLambdaFunctionPermission:
-    Type: AWS::Lambda::Permission
-    DependsOn:
-      - ChatApi
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref ChatApiLambdaFunction
-      Principal: apigateway.amazonaws.com
-
   ChatApiLambdaFunctionExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -197,8 +229,3 @@ Resources:
       Value: !Join [ '', [ '{"Enabled":true,"QueueUrl":"x-api-key"}' ] ]
       Description: ChatApiEventBusParameter  
   
-        
-Outputs:
-  ChatApiURI:
-    Description: "The Rest URI to connect to"
-    Value: !Join [ '', [ 'https://', !Ref ChatApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/','prod' ] ]
