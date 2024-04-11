@@ -24,6 +24,7 @@ namespace Api.Endpoints.V1.Room.Message
             [FromServices] IUserRoomRepository userRoomRepository,
             [FromServices] IEventPublisher eventPublisher,
             [FromServices] IEventBusManager eventBusManager,
+            [FromServices] IUserBanRepository banRepository,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -37,6 +38,18 @@ namespace Api.Endpoints.V1.Room.Message
                 return Results.Forbid();
             }
 
+            if (!room.IsGroup)
+            {
+                var otherAttender = room.Attenders.FirstOrDefault(q => q != apiContext.CurrentUserId);
+                if (otherAttender != null)
+                {
+                    var banInfo = await banRepository.GetBannedInfoAsync(apiContext.CurrentUserId, otherAttender,
+                        cancellationToken);
+                    if (banInfo.Any())
+                        return Results.Forbid();
+                }
+            }
+
             var utcNow = DateTime.UtcNow;
 
             var messageId = utcNow.ToUnixTimeMilliseconds().ToString();
@@ -46,12 +59,13 @@ namespace Api.Endpoints.V1.Room.Message
                 Body = request.Body,
                 CreatedAt = utcNow,
                 MessageReactions = new List<MessageEntity.MessageReactionDataModel>(),
-                MessageStatus = room.Attenders.Where(q => q != apiContext.CurrentUserId).Select(q => new MessageEntity.MessageStatusDataModel
-                {
-                    Status = MessageStatus.Delivered,
-                    CreatedUtc = utcNow,
-                    TargetId = q
-                }).ToList(),
+                MessageStatus = room.Attenders.Where(q => q != apiContext.CurrentUserId).Select(q =>
+                    new MessageEntity.MessageStatusDataModel
+                    {
+                        Status = MessageStatus.Delivered,
+                        CreatedUtc = utcNow,
+                        TargetId = q
+                    }).ToList(),
                 RoomId = id,
                 SenderId = apiContext.CurrentUserId,
                 ThreadId = null,
@@ -71,9 +85,11 @@ namespace Api.Endpoints.V1.Room.Message
             room.LastMessageInfo = lastMessages;
             room.LastActivityAt = utcNow;
             await roomRepository.SaveRoomAsync(room, cancellationToken);
-             var roomLastActivity = await roomLastActivityRepository.GetRoomLastActivityAsync(room.Id, cancellationToken);
-           
-            await userRoomRepository.SaveBatchAsync(room.Id, room.Attenders,roomLastActivity?.LastActivityAt, utcNow, cancellationToken);
+            var roomLastActivity =
+                await roomLastActivityRepository.GetRoomLastActivityAsync(room.Id, cancellationToken);
+
+            await userRoomRepository.SaveBatchAsync(room.Id, room.Attenders, roomLastActivity?.LastActivityAt, utcNow,
+                cancellationToken);
 
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {

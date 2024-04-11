@@ -18,6 +18,8 @@ namespace Domain.Dto.Room
         public bool HasNotification { get; set; }
         public bool IsGroup { get; set; }
 
+        public List<string> BannedAttenders { get; set; } = new();
+
         public class TypingAttenderDto
         {
             public string UserId { get; set; } = default!;
@@ -67,6 +69,13 @@ namespace Domain.Dto.Room
                 Name = entity.Name,
                 LastActivityAt = entity.LastActivityAt
             };
+        }
+
+        public static RoomDto ToDto(this RoomEntity entity, List<UserBanEntity> banEntities)
+        {
+            var dto = entity.ToDto();
+            dto.BannedAttenders.AddRange(banEntities.Select(q => q.FromUserId));
+            return dto;
         }
     }
 }

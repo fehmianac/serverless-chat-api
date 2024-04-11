@@ -1,3 +1,5 @@
+using Domain.Entities;
+
 namespace Domain.Repositories
 {
     public interface IUserBanRepository
@@ -9,5 +11,7 @@ namespace Domain.Repositories
         Task<bool> DeleteBanAsync(string fromUserId, string toUserId, CancellationToken cancellationToken = default);
     
         Task<IEnumerable<string>> GetBannedUsersAsync(string fromUserId, CancellationToken cancellationToken = default);
+        
+        Task<List<UserBanEntity>> GetBannedInfoAsync(string from,string to, CancellationToken cancellationToken = default);
     }
 }

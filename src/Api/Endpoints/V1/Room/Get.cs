@@ -12,6 +12,7 @@ namespace Api.Endpoints.V1.Room
             [FromRoute] string id,
             [FromServices] IApiContext apiContext,
             [FromServices] IRoomRepository roomRepository,
+            [FromServices] IUserBanRepository userBanRepository,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -24,7 +25,20 @@ namespace Api.Endpoints.V1.Room
             {
                 return Results.Forbid();
             }
-
+            
+            if (!room.IsGroup)
+            {
+                var otherAttender = room.Attenders.FirstOrDefault(q => q != apiContext.CurrentUserId);
+                if (otherAttender != null)
+                {
+                    var banInfo = await userBanRepository.GetBannedInfoAsync(apiContext.CurrentUserId, otherAttender,
+                        cancellationToken);
+                    if (banInfo.Any())
+                    {
+                        return Results.Ok(room.ToDto(banInfo));
+                    }
+                }
+            }
             return Results.Ok(room.ToDto());
         }
 

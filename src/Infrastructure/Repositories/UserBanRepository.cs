@@ -39,4 +39,21 @@ public class UserBanRepository : DynamoRepository, IUserBanRepository
         var bans = await GetAllAsync<UserBanEntity>($"userBan#{fromUserId}", cancellationToken);
         return bans.Select(q => q.ToUserId);
     }
+
+    public async Task<List<UserBanEntity>> GetBannedInfoAsync(string from, string to, CancellationToken cancellationToken = default)
+    {
+        return await BatchGetAsync(new List<UserBanEntity>
+        {
+            new()
+            {
+                FromUserId = from,
+                ToUserId = to
+            },
+            new()
+            {
+                FromUserId = to,
+                ToUserId = from
+            }
+        }, cancellationToken);
+    }
 }
