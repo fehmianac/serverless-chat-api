@@ -19,6 +19,7 @@ namespace Domain.Dto.Room
         public bool IsGroup { get; set; }
 
         public List<string> BannedAttenders { get; set; } = new();
+        public List<string> BannerAttenders { get; set; } = new();
 
         public class TypingAttenderDto
         {
@@ -74,7 +75,8 @@ namespace Domain.Dto.Room
         public static RoomDto ToDto(this RoomEntity entity, List<UserBanEntity> banEntities)
         {
             var dto = entity.ToDto();
-            dto.BannedAttenders.AddRange(banEntities.Select(q => q.FromUserId));
+            dto.BannedAttenders.AddRange(banEntities.Select(q => q.ToUserId));
+            dto.BannerAttenders.AddRange(banEntities.Select(q => q.FromUserId));
             return dto;
         }
     }
