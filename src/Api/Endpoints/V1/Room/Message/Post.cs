@@ -99,13 +99,13 @@ namespace Api.Endpoints.V1.Room.Message
                 MessageId = messageId
             }, cancellationToken);
             await eventBusManager.RoomMessageAddedAsync(room.ToDto(), messageEntity.ToDto(), cancellationToken);
-            return Results.Ok();
+            return Results.Ok(messageId);
         }
 
         public void MapEndpoint(IEndpointRouteBuilder endpoints)
         {
             endpoints.MapPost("/v1/rooms/{id}/messages", Handler)
-                .Produces(StatusCodes.Status200OK)
+                .Produces<string>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status403Forbidden)
                 .ProducesProblem(StatusCodes.Status404NotFound)
