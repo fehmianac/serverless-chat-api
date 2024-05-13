@@ -50,6 +50,9 @@ var logger = new LoggerConfiguration()
     .MinimumLevel.Override("System.", LogEventLevel.Warning)
     .CreateLogger();
 
+// Register Serilog
+builder.Logging.AddSerilog(logger);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
