@@ -18,7 +18,7 @@ public class RoomCreatedEventConsumer : IConsumer<RoomCreatedEvent>
     {
         await _pubSubServices.NotifyUser(payload.Room.Attenders, new RoomCreatedNotifyModel
         {
-            Room = payload.Room
+            Room = payload.Room,
         }, cancellationToken);
     }
 }

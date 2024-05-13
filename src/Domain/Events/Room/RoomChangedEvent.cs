@@ -1,3 +1,5 @@
+using Domain.Dto.Room;
+
 namespace Domain.Events.Room;
 
 public class RoomChangedEvent
@@ -6,4 +8,5 @@ public class RoomChangedEvent
     public DateTime ActivityAt { get; set; }
     public bool HasNewMessage { get; set; }
     public string? MessageId { get; set; }
+    public MessageDto? Message { get; set; } 
 }

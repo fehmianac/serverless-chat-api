@@ -102,7 +102,9 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
         await _roomNotificationRepository.SaveBatchRoomNotificationAsync(notificationEntities, cancellationToken);
         await _pubSubServices.NotifyUser(room.Attenders, new RoomChangedNotifyModel
         {
-            RoomId = room.Id
+            RoomId = room.Id,
+            Message = payload.Message
+            
         }, cancellationToken);
     }
 }
