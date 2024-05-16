@@ -29,15 +29,26 @@ namespace Api.Endpoints.V1.Room
             {
                 request.IsGroup = true;
             }
-
+            
+            var utcNow = DateTime.UtcNow;
             if (!request.IsGroup)
             {
                 var roomId = await roomRepository.FindPrivateRoomUserMappingAsync(request.Attenders, cancellationToken);
                 if (!string.IsNullOrEmpty(roomId))
+                {
+                    
+                    var oldRoom = await roomRepository.GetRoomAsync(roomId, cancellationToken);
+                    if (oldRoom == null)
+                    {
+                        return Results.NotFound();
+                    }
+                    
+                    await userRoomRepository.SaveBatchAsync(oldRoom.Id, oldRoom.Attenders, oldRoom?.LastActivityAt, utcNow,
+                        cancellationToken);
                     return Results.Created($"/v1/rooms/{roomId}", roomId);
+                }
             }
-            
-            var utcNow = DateTime.UtcNow;
+          
             var room = new RoomEntity
             {
                 Id = Guid.NewGuid().ToString("N"),
