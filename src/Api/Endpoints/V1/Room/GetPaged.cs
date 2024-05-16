@@ -34,7 +34,7 @@ namespace Api.Endpoints.V1.Room
                 });
             }
 
-            var rooms = await roomRepository.GetUserRoomsAsync(userRooms.Select(x => x.RoomId).ToList(),
+            var rooms = await roomRepository.GetUserRoomsAsync(userRooms.Select(x => x.RoomId).Distinct().ToList(),
                 cancellationToken);
 
             var messageEntities = rooms.SelectMany(q => q.LastMessageInfo.Select(x => new MessageEntity

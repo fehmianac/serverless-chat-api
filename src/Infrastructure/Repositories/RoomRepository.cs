@@ -51,7 +51,7 @@ namespace Infrastructure.Repositories
             return await SaveAsync(room, cancellationToken);
         }
 
-        public async Task<string?> FindPrivateRoomUserMappingAsync(List<string> attenders,
+        public async Task<string?> FindAndDeletePrivateRoomUserMappingAsync(List<string> attenders,
             CancellationToken cancellationToken = default)
         {
             if (attenders.Count != 2)
@@ -69,6 +69,8 @@ namespace Infrastructure.Repositories
             };
             var response = await GetAsync<PrivateRoomUserMappingEntity>(PrivateRoomUserMappingEntity.GetPk(), entity.Sk,
                 cancellationToken);
+            if (response != null)
+                await DeleteAsync(entity.Pk, entity.Sk, cancellationToken);
             return response?.RoomId;
         }
 
