@@ -36,9 +36,13 @@ namespace Api.Endpoints.V1.Room
                 var roomId = await roomRepository.FindAndDeletePrivateRoomUserMappingAsync(request.Attenders, cancellationToken);
                 if (!string.IsNullOrEmpty(roomId))
                 {
-                    foreach (var user in request.Attenders)
+                    var oldRoom = await roomRepository.GetRoomAsync(roomId, cancellationToken);
+                    if (oldRoom != null)
                     {
-                        await userRoomRepository.DeleteUserRoomAsync(user, roomId, utcNow, cancellationToken);
+                        foreach (var user in request.Attenders)
+                        {
+                            await userRoomRepository.DeleteUserRoomAsync(user, roomId, oldRoom.LastActivityAt, cancellationToken);
+                        }
                     }
                 }
             }
