@@ -10,6 +10,7 @@ namespace Api.Endpoints.V1.Room.Message
     {
         private static async Task<IResult> Handler([FromRoute] string id,
             [FromRoute] string messageId,
+            [FromBody] DeleteMessageRequestModel model,
             [FromServices] IApiContext apiContext,
             [FromServices] IRoomRepository roomRepository,
             [FromServices] IMessageRepository messageRepository,
@@ -33,13 +34,28 @@ namespace Api.Endpoints.V1.Room.Message
                 return Results.NotFound();
             }
 
-            await deletedMessageRepository.SaveDeletedMessageAsync(new DeletedMessageEntity
+            if(message.SenderId == apiContext.CurrentUserId && model.DeleteForAll)
             {
-                MessageId = messageId,
-                RoomId = id,
-                UserId = apiContext.CurrentUserId
-            }, cancellationToken);
-
+                foreach (var attender in room.Attenders)
+                {
+                    await deletedMessageRepository.SaveDeletedMessageAsync(new DeletedMessageEntity
+                    {
+                        MessageId = messageId,
+                        RoomId = id,
+                        UserId = attender
+                    }, cancellationToken);
+                }
+            }
+            else
+            {
+                await deletedMessageRepository.SaveDeletedMessageAsync(new DeletedMessageEntity
+                {
+                    MessageId = messageId,
+                    RoomId = id,
+                    UserId = apiContext.CurrentUserId
+                }, cancellationToken); 
+            }
+            
             return Results.Ok();
         }
 
@@ -53,4 +69,5 @@ namespace Api.Endpoints.V1.Room.Message
                 .WithTags("Room");
         }
     }
+    public record DeleteMessageRequestModel(bool DeleteForAll);
 }
