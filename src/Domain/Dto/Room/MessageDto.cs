@@ -23,6 +23,7 @@ namespace Domain.Dto.Room
 
 
         public MessageAttachmentDto? MessageAttachment { get; set; }
+        public bool IsDeleted { get; set; }
 
         public class MessageStatusDto
         {

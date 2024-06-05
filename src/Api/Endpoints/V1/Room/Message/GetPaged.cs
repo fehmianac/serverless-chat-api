@@ -56,6 +56,7 @@ namespace Api.Endpoints.V1.Room.Message
                 }
 
                 messageDto.Body = "Message deleted";
+                messageDto.IsDeleted = true;
                 if (messageDto.MessageAttachment != null)
                 {
                     messageDto.MessageAttachment.Payload = "attachment deleted";
