@@ -60,7 +60,7 @@ namespace Api.Endpoints.V1.Room
                 await roomNotificationRepository.GetRoomNotificationAsync(userId, cancellationToken);
             foreach (var roomDto in roomResult)
             {
-                var notification = roomNotificationList.FirstOrDefault(q => q.RoomId == roomDto.Id);
+                var notification = roomNotificationList.FirstOrDefault(q => q.RoomId == roomDto.Id && q.UserId== userId);
                 if (notification == null)
                     continue;
 
