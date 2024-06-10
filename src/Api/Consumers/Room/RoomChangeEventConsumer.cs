@@ -72,7 +72,7 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
                 new RoomNotificationEntity
                 {
                     HasNotification = true,
-                    MessageCount = 1,
+                    MessageCount = q == payload.SenderId ? 0 : 1,
                     RoomId = room.Id,
                     UserId = q,
                     MessageIds = payload is { MessageId: not null, HasNewMessage: true }
@@ -89,6 +89,9 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
         {
             if (payload.HasNewMessage)
             {
+                if (notificationEntity.UserId == payload.SenderId)
+                    continue;
+
                 notificationEntity.MessageCount += 1;
                 if (!string.IsNullOrWhiteSpace(payload.MessageId))
                 {
@@ -104,7 +107,6 @@ public class RoomChangeEventConsumer : IConsumer<RoomChangedEvent>
         {
             RoomId = room.Id,
             Message = payload.Message
-            
         }, cancellationToken);
     }
 }

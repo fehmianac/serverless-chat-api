@@ -45,6 +45,7 @@ namespace Api.Endpoints.V1.Room.User
             
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {
+                SenderId = userId,
                 RoomId = room.Id,
                 ActivityAt = DateTime.UtcNow
             }, cancellationToken);

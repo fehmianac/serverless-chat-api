@@ -50,6 +50,7 @@ namespace Api.Endpoints.V1.Room.User.Admin
             await roomRepository.SaveRoomAsync(room, cancellationToken);
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {
+                SenderId = userId,
                 RoomId = room.Id,
                 ActivityAt = DateTime.UtcNow
             }, cancellationToken);

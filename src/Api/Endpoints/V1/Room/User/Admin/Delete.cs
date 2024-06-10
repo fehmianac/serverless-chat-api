@@ -47,6 +47,7 @@ namespace Api.Endpoints.V1.Room.User.Admin
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {
                 RoomId = room.Id,
+                SenderId = userId,
                 ActivityAt = DateTime.UtcNow
             }, cancellationToken);
             await eventBusManager.RoomAdminRemovedAsync(room.ToDto(), userId, cancellationToken);

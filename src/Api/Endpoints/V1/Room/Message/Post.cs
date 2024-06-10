@@ -96,6 +96,7 @@ namespace Api.Endpoints.V1.Room.Message
                 RoomId = id,
                 ActivityAt = utcNow,
                 HasNewMessage = true,
+                SenderId = apiContext.CurrentUserId,
                 MessageId = messageId,
                 Message = messageEntity.ToDto()
             }, cancellationToken);

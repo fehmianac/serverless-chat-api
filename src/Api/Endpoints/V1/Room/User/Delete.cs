@@ -43,6 +43,7 @@ namespace Api.Endpoints.V1.Room.User
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {
                 RoomId = room.Id,
+                SenderId = userId,
                 ActivityAt = utcNow
             }, cancellationToken);
             await eventBusManager.RoomAttenderRemovedAsync(room.ToDto(), userId, cancellationToken);

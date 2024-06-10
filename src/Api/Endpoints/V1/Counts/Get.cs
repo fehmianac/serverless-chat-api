@@ -13,6 +13,7 @@ namespace Api.Endpoints.V1.Counts
             CancellationToken cancellationToken)
         {
             var result = await messageCountRepository.GetRoomNotificationAsync(apiContext.CurrentUserId, cancellationToken);
+            
             return Results.Ok(result.Sum(q => q.MessageCount));
         }
 

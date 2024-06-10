@@ -14,6 +14,7 @@ namespace Api.Endpoints.V1.Room.Message
             [FromServices] IRoomRepository roomRepository,
             [FromServices] IMessageRepository messageRepository,
             [FromServices] IClearRoomRepository clearRoomRepository,
+            [FromServices] IRoomNotificationRepository roomNotificationRepository,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -33,6 +34,15 @@ namespace Api.Endpoints.V1.Room.Message
                 UserId = apiContext.CurrentUserId,
                 Time = DateTime.UtcNow.ToUnixTimeMilliseconds()
             }, cancellationToken);
+            
+            var unreadMessages = await roomNotificationRepository.GetRoomNotificationAsync(apiContext.CurrentUserId,id,cancellationToken);
+            
+            if (unreadMessages == null) 
+                return Results.Ok();
+            
+            unreadMessages.MessageCount = 0;
+            unreadMessages.MessageIds.Clear();
+            await roomNotificationRepository.SaveRoomNotificationAsync(unreadMessages, cancellationToken);
 
             return Results.Ok();
         }
