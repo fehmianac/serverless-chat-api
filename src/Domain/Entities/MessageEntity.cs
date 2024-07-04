@@ -11,6 +11,8 @@ namespace Domain.Entities
         [JsonPropertyName("id")] public string Id { get; set; } = default!;
         [JsonPropertyName("roomId")] public string RoomId { get; set; } = default!;
         [JsonPropertyName("threadId")] public string? ThreadId { get; set; }
+        
+        [JsonPropertyName("parentId")] public string? ParentId { get; set; }
         [JsonPropertyName("senderId")] public string SenderId { get; set; } = default!;
         [JsonPropertyName("body")] public string Body { get; set; } = default!;
         [JsonPropertyName("createdAt")] public DateTime CreatedAt { get; set; }

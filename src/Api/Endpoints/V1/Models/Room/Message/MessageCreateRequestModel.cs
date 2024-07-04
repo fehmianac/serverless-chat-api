@@ -3,6 +3,7 @@ namespace Api.Endpoints.V1.Models.Room.Message;
 public class MessageCreateRequestModel
 {
     public string Body { get; set; } = default!;
+    public string? ParentId { get; set; }
 
     public SendMessageAttachmentRequest? Attachment { get; set; }
 

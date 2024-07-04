@@ -58,6 +58,7 @@ namespace Api.Endpoints.V1.Room.Message
                 Id = messageId,
                 Body = request.Body,
                 CreatedAt = utcNow,
+                ParentId = request.ParentId,
                 MessageReactions = new List<MessageEntity.MessageReactionDataModel>(),
                 MessageStatus = room.Attenders.Where(q => q != apiContext.CurrentUserId).Select(q =>
                     new MessageEntity.MessageStatusDataModel

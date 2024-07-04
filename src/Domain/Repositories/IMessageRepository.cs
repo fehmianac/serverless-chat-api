@@ -8,6 +8,7 @@ namespace Domain.Repositories
         Task<bool> SaveMessageAsync(MessageEntity message, CancellationToken cancellationToken = default);
         Task<IList<MessageEntity>> GetBatchAsync(IEnumerable<MessageEntity> messageEntities, CancellationToken cancellationToken);
         Task<MessageEntity?> GetMessageAsync(string id, string messageId, CancellationToken cancellationToken);
+        Task<List<MessageEntity>> GetMessagesAsync(string id, List<string> messageIds, CancellationToken cancellationToken);
         Task<bool> SaveMessagesAsync(IList<MessageEntity> messages, CancellationToken cancellationToken);
     }
 }

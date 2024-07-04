@@ -24,7 +24,7 @@ namespace Domain.Dto.Room
 
         public MessageAttachmentDto? MessageAttachment { get; set; }
         public bool IsDeleted { get; set; }
-
+        public MessageDto? Parent { get; set; }
         public class MessageStatusDto
         {
             public string TargetId { get; set; } = default!;
@@ -68,6 +68,10 @@ namespace Domain.Dto.Room
                 Body = entity.Body,
                 Id = entity.Id,
                 CreatedAt = entity.CreatedAt,
+                Parent = entity.ParentId == null ? null : new MessageDto
+                {
+                    Id = entity.ParentId
+                },
                 MessageAttachment = entity.MessageAttachment == null
                     ? null
                     : new MessageDto.MessageAttachmentDto

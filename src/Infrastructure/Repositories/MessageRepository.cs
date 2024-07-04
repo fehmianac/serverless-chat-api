@@ -51,6 +51,15 @@ namespace Infrastructure.Repositories
             return await GetAsync<MessageEntity?>($"messages#{id}", messageId, cancellationToken);
         }
 
+        public async Task<List<MessageEntity>> GetMessagesAsync(string id, List<string> messageIds, CancellationToken cancellationToken)
+        {
+            return await BatchGetAsync(messageIds.Select(q => new MessageEntity
+            {
+                RoomId = id,
+                Id = q
+            }).ToList(), cancellationToken);
+        }
+
         public async Task<bool> SaveMessagesAsync(IList<MessageEntity> messages, CancellationToken cancellationToken)
         {
              await base.BatchWriteAsync(new List<IEntity>(messages), new List<IEntity>(), cancellationToken);

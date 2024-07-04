@@ -47,9 +47,30 @@ namespace Api.Endpoints.V1.Room.Message
             var (messages, nextTokenResult) =
                 await messageRepository.GetMessagePagedAsync(id, nextToken, limit, lastClearTime, cancellationToken);
 
+            var parentMessages = new List<MessageEntity>();
+            var parentMessageIds = messages.Select(q => q.ParentId).Where(q => q != null).Distinct().ToList();
+            if (parentMessageIds.Count != 0)
+            {
+                parentMessages = await messageRepository.GetMessagesAsync(id, parentMessageIds, cancellationToken);
+            }
+
             var messageResult = messages.Select(q => q.ToDto()).ToList();
             foreach (var messageDto in messageResult)
             {
+                if(messageDto.Parent != null)
+                {
+                    var parentMessage = parentMessages.FirstOrDefault(q => q.Id == messageDto.Parent.Id);
+                    if (parentMessage != null)
+                    {
+                        messageDto.Parent = parentMessage.ToDto();
+                        if (deletedMessagesHashSet.Contains(messageDto.Id))
+                        {
+                            messageDto.Parent.Body = "Message deleted";
+                            messageDto.Parent.IsDeleted = true;
+                        }
+                    }
+                }
+                
                 if (!deletedMessagesHashSet.Contains(messageDto.Id))
                 {
                     continue;
@@ -62,7 +83,7 @@ namespace Api.Endpoints.V1.Room.Message
                     messageDto.MessageAttachment.Payload = "attachment deleted";
                 }
             }
-            
+
             return Results.Ok(new PagedResponse<MessageDto>
             {
                 Data = messageResult,
