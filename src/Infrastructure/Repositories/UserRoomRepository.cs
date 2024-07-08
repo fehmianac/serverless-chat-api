@@ -57,6 +57,7 @@ public class UserRoomRepository : DynamoRepository, IUserRoomRepository
     public async Task<bool> DeleteUserRoomAsync(string userId, string roomId, DateTime lastActivity,
         CancellationToken cancellationToken)
     {
+        
         return await DeleteAsync($"userRoom#{userId}", $"{lastActivity.ToUnixTimeMilliseconds()}#{roomId}",
             cancellationToken);
     }

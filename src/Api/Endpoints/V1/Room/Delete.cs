@@ -16,6 +16,7 @@ public class Delete : IEndpoint
         [FromServices] IUserRoomRepository userRoomRepository,
         [FromServices] IRoomLastActivityRepository roomLastActivityRepository,
         [FromServices] IClearRoomRepository clearRoomRepository,
+        [FromServices] IRoomNotificationRepository roomNotificationRepository,
         CancellationToken cancellationToken)
     {
         var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -31,7 +32,7 @@ public class Delete : IEndpoint
         var utcNow = DateTime.UtcNow;
         var lastActivity = roomLastActivity?.LastActivityAt ?? utcNow;
         await userRoomRepository.DeleteUserRoomAsync(apiContext.CurrentUserId, id, lastActivity, cancellationToken);
-        
+        await roomNotificationRepository.DeleteRoomNotificationAsync(apiContext.CurrentUserId, id, cancellationToken);
         await clearRoomRepository.SaveAsync(new ClearRoomEntity
         {
             RoomId = id,

@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Domain.Entities.Base;
+using Domain.Extensions;
 
 namespace Domain.Entities
 {
@@ -12,5 +13,20 @@ namespace Domain.Entities
         [JsonPropertyName("count")] public int MessageCount { get; set; }
         [JsonPropertyName("hasNotification")] public bool HasNotification { get; set; }
         [JsonPropertyName("messageIds")] public List<string> MessageIds { get; set; } = new();
+
+
+        [JsonPropertyName("ttl")]
+        public long Ttl
+        {
+            get
+            {
+                if (MessageCount == 0)
+                {
+                    return DateTime.UtcNow.AddMinutes(10).ToUnixTimeMilliseconds();
+                }
+
+                return DateTime.UtcNow.AddDays(7).ToUnixTimeMilliseconds();
+            }
+        }
     }
 }

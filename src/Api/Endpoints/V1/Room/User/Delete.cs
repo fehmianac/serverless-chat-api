@@ -20,6 +20,7 @@ namespace Api.Endpoints.V1.Room.User
             [FromServices] IRoomLastActivityRepository roomLastActivityRepository,
             [FromServices] IEventPublisher eventPublisher,
             [FromServices] IEventBusManager eventBusManager,
+            [FromServices] IRoomNotificationRepository roomNotificationRepository,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -40,6 +41,7 @@ namespace Api.Endpoints.V1.Room.User
             var utcNow = DateTime.UtcNow;
             var lastActivity = roomLastActivity?.LastActivityAt ?? utcNow;
             await userRoomRepository.DeleteUserRoomAsync(userId, id, lastActivity, cancellationToken);
+            await roomNotificationRepository.DeleteRoomNotificationAsync(apiContext.CurrentUserId, id, cancellationToken);
             await eventPublisher.PublishAsync(new RoomChangedEvent
             {
                 RoomId = room.Id,
