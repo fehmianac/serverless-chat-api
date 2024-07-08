@@ -33,16 +33,15 @@ namespace Api.Endpoints.V1.Room
             var utcNow = DateTime.UtcNow;
             if (!request.IsGroup)
             {
-                var roomId = await roomRepository.FindAndDeletePrivateRoomUserMappingAsync(request.Attenders, cancellationToken);
+                var roomId = await roomRepository.FindPrivateRoomUserMappingAsync(request.Attenders, cancellationToken);
                 if (!string.IsNullOrEmpty(roomId))
                 {
                     var oldRoom = await roomRepository.GetRoomAsync(roomId, cancellationToken);
                     if (oldRoom != null)
                     {
-                        foreach (var user in request.Attenders)
-                        {
-                            await userRoomRepository.DeleteUserRoomAsync(user, roomId, oldRoom.LastActivityAt, cancellationToken);
-                        }
+                        await roomLastActivityRepository.SaveRoomLastActivityAsync(oldRoom.Id, utcNow, cancellationToken);
+                        await eventBusManager.RoomCreatedAsync(oldRoom.ToDto(), cancellationToken);
+                        return Results.Created($"/v1/rooms/{oldRoom.Id}", oldRoom.Id);
                     }
                 }
             }

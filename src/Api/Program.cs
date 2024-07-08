@@ -98,6 +98,7 @@ builder.Services.AddScoped<IApiContext, ApiContext>();
 builder.Services.AddScoped<IEventPublisher, EventPublisher>();
 builder.Services.AddScoped<IPubSubServices, PubSubService>();
 builder.Services.AddScoped<IEventBusManager, EventBusManager>();
+builder.Services.AddScoped<IProblematicImageRepository, ProblematicImageRepository>();
 builder.Services.AddScoped<ApiKeyValidatorMiddleware>();
 var assemblies = GetAssembly();
 foreach (var assembly in assemblies)

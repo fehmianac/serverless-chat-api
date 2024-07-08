@@ -14,7 +14,7 @@ namespace Domain.Repositories
 
         Task<bool> UpdateLastActivityAtAsync(string roomId, DateTime lastActivityAt, CancellationToken cancellationToken = default);
         
-        Task<string?> FindAndDeletePrivateRoomUserMappingAsync(List<string> attenders, CancellationToken cancellationToken = default);
+        Task<string?> FindPrivateRoomUserMappingAsync(List<string> attenders, CancellationToken cancellationToken = default);
         
         Task<bool> SavePrivateRoomUserMappingAsync(string roomId, List<string> attenders, CancellationToken cancellationToken = default);
 

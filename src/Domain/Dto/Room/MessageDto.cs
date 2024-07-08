@@ -49,6 +49,7 @@ namespace Domain.Dto.Room
             public string Payload { get; set; } = null!;
 
             public Dictionary<string, string> AdditionalData { get; set; } = new();
+            public bool IsSensitive { get; set; }
         }
     }
 

@@ -21,6 +21,7 @@ namespace Api.Endpoints.V1.Room.Message
             [FromServices] IDeletedMessageRepository deletedMessageRepository,
             [FromServices] IClearRoomRepository clearRoomRepository,
             [FromServices] IRoomNotificationRepository roomNotificationRepository,
+            [FromServices] IProblematicImageRepository problematicImageRepository,
             CancellationToken cancellationToken)
         {
             var room = await roomRepository.GetRoomAsync(id, cancellationToken);
@@ -54,10 +55,16 @@ namespace Api.Endpoints.V1.Room.Message
                 parentMessages = await messageRepository.GetMessagesAsync(id, parentMessageIds, cancellationToken);
             }
 
+            var problematicImages = await problematicImageRepository.GetProblematicImagesAsync(messages.Where(q =>
+                q.MessageAttachment is
+                {
+                    Type: "image"
+                }).Select(q => q.Id).ToList(), cancellationToken);
+
             var messageResult = messages.Select(q => q.ToDto()).ToList();
             foreach (var messageDto in messageResult)
             {
-                if(messageDto.Parent != null)
+                if (messageDto.Parent != null)
                 {
                     var parentMessage = parentMessages.FirstOrDefault(q => q.Id == messageDto.Parent.Id);
                     if (parentMessage != null)
@@ -70,7 +77,12 @@ namespace Api.Endpoints.V1.Room.Message
                         }
                     }
                 }
-                
+
+                if (messageDto.MessageAttachment != null)
+                {
+                    messageDto.MessageAttachment.IsSensitive = problematicImages.Any(q => q.ImageUrl == messageDto.Id);
+                }
+
                 if (!deletedMessagesHashSet.Contains(messageDto.Id))
                 {
                     continue;
