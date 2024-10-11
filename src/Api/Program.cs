@@ -34,6 +34,7 @@ builder.Configuration.AddSystemsManager(config =>
 builder.Services.Configure<EventBusSettings>(builder.Configuration.GetSection("EventBusSettings"));
 builder.Services.Configure<AwsWebSocketAdapterConfig>(builder.Configuration.GetSection("AwsWebSocketAdapterConfig"));
 builder.Services.Configure<ApiKeyValidationSettings>(builder.Configuration.GetSection("ApiKeyValidationSettings"));
+builder.Services.Configure<AgoraSettings>(builder.Configuration.GetSection("AgoraSettings"));
 
 // Add services to the container.
 builder.Services.AddHttpContextAccessor();

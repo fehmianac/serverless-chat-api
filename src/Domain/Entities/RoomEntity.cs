@@ -6,59 +6,61 @@ namespace Domain.Entities
 
     public class RoomEntity : IEntity
     {
-        [JsonPropertyName("pk")]
-        public string Pk => $"rooms";
+        [JsonPropertyName("pk")] public string Pk => $"rooms";
 
-        [JsonPropertyName("sk")]
-        public string Sk => Id;
+        [JsonPropertyName("sk")] public string Sk => Id;
 
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = default!;
+        [JsonPropertyName("id")] public string Id { get; set; } = default!;
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = default!;
-        
-        [JsonPropertyName("isGroup")]
-        public bool IsGroup { get; set; }
+        [JsonPropertyName("name")] public string Name { get; set; } = default!;
 
-        [JsonPropertyName("description")]
-        public string Description { get; set; } = default!;
+        [JsonPropertyName("isGroup")] public bool IsGroup { get; set; }
 
-        [JsonPropertyName("imageUrl")]
-        public string ImageUrl { get; set; } = default!;
+        [JsonPropertyName("description")] public string Description { get; set; } = default!;
 
-        [JsonPropertyName("attenders")]
-        public List<string> Attenders { get; set; } = new();
+        [JsonPropertyName("imageUrl")] public string ImageUrl { get; set; } = default!;
 
-        [JsonPropertyName("admins")]
-        public List<string> Admins { get; set; } = new();
+        [JsonPropertyName("attenders")] public List<string> Attenders { get; set; } = new();
 
-        [JsonPropertyName("lastMessageInfo")]
-        public List<string> LastMessageInfo { get; set; } = new();
+        [JsonPropertyName("admins")] public List<string> Admins { get; set; } = new();
+
+        [JsonPropertyName("lastMessageInfo")] public List<string> LastMessageInfo { get; set; } = new();
 
         [JsonPropertyName("typingAttenders")]
         public List<TypingAttenderDataModel> TypingAttenders { get; set; } = new();
 
-        [JsonPropertyName("createdAt")]
-        public DateTime CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")] public DateTime CreatedAt { get; set; }
 
-        [JsonPropertyName("lastActivityAt")]
-        public DateTime LastActivityAt { get; set; }
+        [JsonPropertyName("lastActivityAt")] public DateTime LastActivityAt { get; set; }
+       [JsonPropertyName("videoCallIsActive")] public bool VideoCallIsActive { get; set; }
 
-        public class TypingAttenderDataModel
+       [JsonPropertyName("videoCallAttender")] public List<VideoCallAttenderDataModel> VideoCallAttender { get; set; } = new();
+
+       public class TypingAttenderDataModel
         {
-            [JsonPropertyName("userId")]
-            public string UserId { get; set; } = default!;
+            [JsonPropertyName("userId")] public string UserId { get; set; } = default!;
 
-            [JsonPropertyName("typingAt")]
-            public DateTime TypingAt { get; set; }
+            [JsonPropertyName("typingAt")] public DateTime TypingAt { get; set; }
         }
-        
+       
+        public class VideoCallAttenderDataModel
+        {
+            [JsonPropertyName("userId")] public string UserId { get; set; } = default!;
+
+            [JsonPropertyName("isCreator")] public bool IsCreator { get; set; }
+        }
+
+
+        public class VideoCallDataModel
+        {
+            public List<string> AttendersOptIn { get; set; } = new List<string>();
+        }
+
         public bool IsAdmin(string userId)
         {
             return Admins.Contains(userId);
         }
-        
+
         public bool IsAttender(string userId)
         {
             return Attenders.Contains(userId);
