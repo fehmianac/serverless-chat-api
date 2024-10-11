@@ -234,5 +234,5 @@ Resources:
     Properties:
       Name: /chat-api/AgoraSettings
       Type: String
-      Value: !Join [ '', [ '{"AppId":"10fc5705046e4155bce9063ebe2b32b0","AppCertificate":"e3b14e18d1ec4d6a824d6ebbd2721299"}' ] ]
+      Value: !Join [ '', [ '{"AppId":"","AppCertificate":""}' ] ]
       Description: AgoraSettingsParameters
